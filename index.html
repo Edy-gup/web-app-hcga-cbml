@@ -2490,170 +2490,67 @@
 
 
 
-    /* --- DASHBOARD DATA --- */
-
-    function refreshDashboardData() {
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res.success) {
-
-              document.getElementById('stat-total-aset').innerText = res.totalAset;
-
-              document.getElementById('stat-kondisi-baik').innerText = res.kondisiBaik;
-
-              document.getElementById('stat-kondisi-rusak').innerText = res.kondisiRusak;
-
-              document.getElementById('stat-last-update').innerText = res.lastUpdate;
-
-
-
-              const katContainer = document.getElementById('kategori-container');
-
-              katContainer.innerHTML = '';
-
-              Object.keys(res.kategoriBreakdown).forEach(k => {
-
-                katContainer.innerHTML += `
-
-                  <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
-
-                    <p class="text-[10px] uppercase font-bold text-slate-400">${escapeHTML(k)}</p>
-
-                    <p class="text-xl font-extrabold text-white mt-1">${res.kategoriBreakdown[k]}</p>
-
-                  </div>
-
-                `;
-
-              });
-
-            }
-
+/* --- DASHBOARD DATA --- */
+    async function refreshDashboardData() {
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "GET_DASHBOARD",
+            token: sessionToken
           })
+        });
 
-          .getDashboardData(sessionToken);
+        const res = await response.json();
 
-      } else {
+        if (res.success) {
+          document.getElementById('stat-total-aset').innerText = res.totalAset;
+          document.getElementById('stat-kondisi-baik').innerText = res.kondisiBaik;
+          document.getElementById('stat-kondisi-rusak').innerText = res.kondisiRusak;
+          document.getElementById('stat-last-update').innerText = res.lastUpdate;
 
-        document.getElementById('stat-total-aset').innerText = rawAssetsList.length || 2;
-
-        document.getElementById('stat-kondisi-baik').innerText = 2;
-
-        document.getElementById('stat-kondisi-rusak').innerText = 0;
-
-        document.getElementById('stat-last-update').innerText = new Date().toLocaleTimeString();
-
-        document.getElementById('kategori-container').innerHTML = `
-
-          <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
-
-            <p class="text-[10px] uppercase font-bold text-slate-400">HANDY TALKY</p>
-
-            <p class="text-xl font-extrabold text-white mt-1">1</p>
-
-          </div>
-
-          <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
-
-            <p class="text-[10px] uppercase font-bold text-slate-400">LAPTOP</p>
-
-            <p class="text-xl font-extrabold text-white mt-1">1</p>
-
-          </div>
-
-        `;
-
+          const katContainer = document.getElementById('kategori-container');
+          katContainer.innerHTML = '';
+          Object.keys(res.kategoriBreakdown).forEach(k => {
+            katContainer.innerHTML += `
+              <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
+                <p class="text-[10px] uppercase font-bold text-slate-400">${escapeHTML(k)}</p>
+                <p class="text-xl font-extrabold text-white mt-1">${res.kategoriBreakdown[k]}</p>
+              </div>
+            `;
+          });
+        } else {
+          console.error("Gagal memuat dashboard:", res.message);
+        }
+      } catch (e) {
+        console.error("Gagal terhubung ke server:", e);
       }
-
     }
-
-
 
     /* --- ASSET CRUD DATA --- */
-
-    function loadAssetTable() {
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res.success) {
-
-              rawAssetsList = res.data;
-
-              renderAssetTable(rawAssetsList);
-
-              populateKategoriFilter(rawAssetsList);
-
-            }
-
+    async function loadAssetTable() {
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "GET_ASSETS_ALL",
+            token: sessionToken
           })
+        });
 
-          .getAssets(sessionToken);
+        const res = await response.json();
 
-      } else {
-
-        if (rawAssetsList.length === 0) {
-
-          rawAssetsList = [
-
-            {
-
-              'Kode Aset': '225',
-
-              'Nama Aset': 'Handy Talky Portable',
-
-              'Kategori': 'HANDY TALKY',
-
-              'Tipe Aset': 'HARDWARE',
-
-              'Merk': 'MOTOROLA',
-
-              'Model': 'Motorola Solutions Portable (AZH03KEK8AA9) TANAPA PMUD2437AAA R03.05 CP1660 VHF',
-
-              'Serial Number': '1335UB1432',
-
-              'ID Karyawan (NRP)': 'CB.1106.0304',
-
-              'PIC Barang': 'Sukardiyono',
-
-              'Jabatan': 'Foreman Plant',
-
-              'Unit Bisnis': 'PT. Chandra Batuah Mustika Lestari',
-
-              'Divisi': 'PLANT',
-
-              'Kondisi': 'Baik',
-
-              'Lokasi': 'CBML Site Adaro',
-
-              'Tahun Diterima': '2026',
-
-              'Tanggal Penyerahan': '2026-07-01'
-
-            }
-
-          ];
-
+        if (res.success) {
+          rawAssetsList = res.data;
+          renderAssetTable(rawAssetsList);
+          populateKategoriFilter(rawAssetsList);
+        } else {
+          console.error("Gagal memuat data aset:", res.message);
         }
-
-        renderAssetTable(rawAssetsList);
-
-        populateKategoriFilter(rawAssetsList);
-
+      } catch (e) {
+        console.error("Gagal terhubung ke server:", e);
       }
-
     }
-
-
-
     function renderAssetTable(data) {
 
       const tbody = document.getElementById('asset-table-body');
