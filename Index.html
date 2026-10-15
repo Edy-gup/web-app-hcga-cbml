@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Dashboard HCGA</title>
+    <!-- Framework Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <!-- Header Aplikasi -->
+        <div class="border-b pb-4 mb-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Dashboard Control HCGA</h1>
+                <p class="text-sm text-gray-500">PT. Chandra Batuah Mustika Lestari</p>
+            </div>
+            <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
+                Refresh Data
+            </button>
+        </div>
+
+        <!-- Status Loading -->
+        <div id="loading" class="text-center py-8 text-gray-500">
+            Memuat data dari sistem...
+        </div>
+
+        <!-- Area Hasil Data -->
+        <div id="content" class="hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-700 uppercase text-xs">
+                            <th class="p-3 border-b">No</th>
+                            <th class="p-3 border-b">Nama / Item</th>
+                            <th class="p-3 border-b">Keterangan</th>
+                            <th class="p-3 border-b">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm text-gray-600 divide-y">
+                        <!-- Data dari Google Sheet akan dimasukkan ke sini -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwwkbYas5L_NWO82w54o5r-4xMFwtqHadyjT6LtHKl5K1dYoxsLSSKjJtDgZOhFkRKx9g/exec";
+
+        // Fungsi mengambil data dari Apps Script (doGet)
+        async function fetchData() {
+            const loadingEl = document.getElementById('loading');
+            const contentEl = document.getElementById('content');
+            
+            loadingEl.classList.remove('hidden');
+            contentEl.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${GAS_URL}?action=getData`);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    renderTable(result.data);
+                    loadingEl.classList.add('hidden');
+                    contentEl.classList.remove('hidden');
+                } else {
+                    alert("Gagal mengambil data dari server.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                loadingEl.innerText = "Terjadi kesalahan koneksi ke server.";
+            }
+        }
+
+        // Fungsi menampilkan data ke dalam tabel HTML
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            // Asumsi baris 0 adalah Header di Google Sheet, kita mulai dari baris ke-1
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-3">${i}</td>
+                    <td class="p-3 font-medium text-gray-900">${row[0] || '-'}</td>
+                    <td class="p-3">${row[1] || '-'}</td>
+                    <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${row[2] || 'Aktif'}</span></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Jalankan pemanggilan data otomatis saat halaman selesai dimuat
+        document.addEventListener('DOMContentLoaded', fetchData);
+    </script>
+</body>
+</html>
