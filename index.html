@@ -3956,26 +3956,43 @@ function openStickerLabelPrintWindow(data) {
 
 
 
-    function loadActivityLog() {
+   async function loadActivityLog() {
+  const body = document.getElementById('activity-table-body');
+  if (!body) return;
+  body.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Memuat catatan login...</td></tr>';
 
-      const body=document.getElementById('activity-table-body'); if(!body)return;
-
-      body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-slate-500">Memuat catatan login...</td></tr>';
-
-      google.script.run.withSuccessHandler(res=>{
-
-        if(!res||!res.success){body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-red-400">Log tidak dapat dimuat.</td></tr>';return;}
-
-        const rows=res.data||[];
-
-        if(!rows.length){body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-slate-500">Belum ada catatan login tercatat.</td></tr>';return;}
-
-        body.innerHTML=rows.map(r=>`<tr class="border-b border-slate-800 hover:bg-slate-800/40"><td class="p-3 whitespace-nowrap text-slate-400">${escapeHTML(r['Waktu']||'')}</td><td class="p-3 font-semibold text-white">${escapeHTML(r['Username']||'')}</td><td class="p-3 text-slate-400">${escapeHTML(r['Role']||'')}</td><td class="p-3 font-semibold text-cyan-400">${escapeHTML(r['Aktivitas']||'')}</td><td class="p-3 text-slate-400">${escapeHTML(r['Detail']||'')}</td></tr>`).join('');
-
-      }).withFailureHandler(err=>{body.innerHTML=`<tr><td colspan="5" class="p-6 text-center text-red-400">Gagal memuat log: ${escapeHTML(err&&err.message?err.message:err)}</td></tr>`;}).getAuditLog(sessionToken,300);
-
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "GET_AUDIT_LOG",
+        token: sessionToken,
+        limit: 300
+      })
+    });
+    const res = await response.json();
+    if (!res || !res.success) {
+      body.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-red-400">Log tidak dapat dimuat.</td></tr>';
+      return;
     }
-
+    const rows = res.data || [];
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-slate-500">Belum ada catatan login tercatat.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <tr class="border-b border-slate-800 hover:bg-slate-800/40">
+        <td class="p-3 whitespace-nowrap text-slate-400">${escapeHTML(r['Waktu']||'')}</td>
+        <td class="p-3 font-semibold text-white">${escapeHTML(r['Username']||'')}</td>
+        <td class="p-3 text-slate-400">${escapeHTML(r['Role']||'')}</td>
+        <td class="p-3 font-semibold text-cyan-400">${escapeHTML(r['Aktivitas']||'')}</td>
+        <td class="p-3 text-slate-400">${escapeHTML(r['Detail']||'')}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-red-400">Gagal memuat log: ${escapeHTML(err.message || err)}</td></tr>`;
+  }
+}
 
 
     function auditClientEvent(action, detail) {
@@ -4104,22 +4121,27 @@ function openStickerLabelPrintWindow(data) {
 
 
 
-    function loadInspectionEmployees() {
-
-      if (!sessionToken || !(typeof google !== 'undefined' && google.script && google.script.run)) return;
-
-      google.script.run.withSuccessHandler(res => {
-
-        const list = document.getElementById('inspection-employee-list');
-
-        if (!list || !res || !res.success) return;
-
-        list.innerHTML = (res.data || []).filter(e => e && e.Nama).map(e => `<option value="${escapeHTML(e.Nama)}" label="${escapeHTML([e.NRP,e.Jabatan,e.Divisi].filter(Boolean).join(' · '))}"></option>`).join('');
-
-      }).withFailureHandler(err => console.warn('Master karyawan tidak dapat dimuat:', err)).getEmployees(sessionToken);
-
-    }
-
+   async function loadInspectionEmployees() {
+  if (!sessionToken) return;
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "GET_EMPLOYEES",
+        token: sessionToken
+      })
+    });
+    const res = await response.json();
+    const list = document.getElementById('inspection-employee-list');
+    if (!list || !res || !res.success) return;
+    list.innerHTML = (res.data || [])
+      .filter(e => e && e.Nama)
+      .map(e => `<option value="${escapeHTML(e.Nama)}" label="${escapeHTML([e.NRP,e.Jabatan,e.Divisi].filter(Boolean).join(' · '))}"></option>`)
+      .join('');
+  } catch (err) {
+    console.warn('Master karyawan tidak dapat dimuat:', err);
+  }
+}
 
 
     function handleInspectionResultChange() {
@@ -4150,46 +4172,38 @@ function openStickerLabelPrintWindow(data) {
 
 
 
-    function lookupInspectionAsset() {
+    async function lookupInspectionAsset() {
+  const code = String(document.getElementById('inspection-code').value || '').trim();
+  const status = document.getElementById('scan-status');
+  if (!code) { status.textContent = 'Masukkan atau scan kode aset terlebih dahulu.'; return; }
+  if (!sessionToken) { status.textContent = 'Sesi login tidak ditemukan. Silakan login kembali.'; return; }
+  status.textContent = 'Memverifikasi akses dan memuat detail aset…';
 
-      const code = String(document.getElementById('inspection-code').value || '').trim();
-
-      const status = document.getElementById('scan-status');
-
-      if (!code) { status.textContent = 'Masukkan atau scan kode aset terlebih dahulu.'; return; }
-
-      if (!sessionToken) { status.textContent = 'Sesi login tidak ditemukan. Silakan login kembali.'; return; }
-
-      status.textContent = 'Memverifikasi akses dan memuat detail aset…';
-
-      google.script.run.withSuccessHandler(res => {
-
-        if (!res || !res.success || !res.asset) { status.textContent = 'Detail aset tidak tersedia.'; return; }
-
-        currentInspectionAsset = res.asset;
-
-        renderInspectionAsset(res.asset);
-
-        renderInspectionHistory(res.recentChecks || []);
-
-        status.textContent = 'Aset terverifikasi dari Google Sheets.';
-
-      }).withFailureHandler(err => {
-
-        currentInspectionAsset = null;
-
-        document.getElementById('inspection-detail-card').classList.add('hidden');
-
-        document.getElementById('inspection-history').textContent = 'Riwayat belum tersedia.';
-
-        status.textContent = 'Gagal memuat aset: ' + (err && err.message ? err.message : err);
-
-      }).getAssetDetailForInspection(sessionToken, code);
-
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "GET_INSPECTION_DETAIL",
+        token: sessionToken,
+        code: code
+      })
+    });
+    const res = await response.json();
+    if (res && res.success && res.asset) {
+      currentInspectionAsset = res.asset;
+      renderInspectionAsset(res.asset);
+      renderInspectionHistory(res.recentChecks || []);
+      status.textContent = 'Aset terverifikasi dari Google Sheets.';
+    } else {
+      status.textContent = 'Detail aset tidak tersedia.';
     }
-
-
-
+  } catch (err) {
+    currentInspectionAsset = null;
+    document.getElementById('inspection-detail-card').classList.add('hidden');
+    document.getElementById('inspection-history').textContent = 'Riwayat belum tersedia.';
+    status.textContent = 'Gagal memuat aset: ' + (err.message || err);
+  }
+}
     function renderInspectionAsset(a) {
 
       document.getElementById('inspection-detail-card').classList.remove('hidden');
