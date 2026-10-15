@@ -1,101 +1,4446 @@
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Dashboard HCGA</title>
-    <!-- Framework Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Aplikasi Data Aset & Serah Terima - PT. CBML</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+
+  <style>
+
+    body { 
+
+      font-family: 'Inter', sans-serif; 
+
+      background: radial-gradient(circle at top right, #0f172a, #020617);
+
+      transition: background-color 0.3s ease, background 0.3s ease;
+
+    }
+
+
+
+    /* Custom Mobile Touch & Input Focus Styles */
+
+    .input-touch {
+
+      height: 52px;
+
+      font-size: 15px;
+
+    }
+
+
+
+    .btn-touch {
+
+      height: 52px;
+
+      font-size: 15px;
+
+      font-weight: 600;
+
+    }
+
+
+
+    /* Scanner Laser Animation Overlay */
+
+    .scan-laser {
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      width: 100%;
+
+      height: 3px;
+
+      background: #00ffaa;
+
+      box-shadow: 0 0 15px #00ffaa;
+
+      animation: scanMove 2.5s infinite ease-in-out;
+
+    }
+
+
+
+    @keyframes scanMove {
+
+      0% { top: 5%; }
+
+      50% { top: 90%; }
+
+      100% { top: 5%; }
+
+    }
+
+    
+
+    /* ==================================================
+
+       PENGATURAN CETAK SURAT SERAH TERIMA ASET
+
+       ================================================== */
+
+    @media print {
+
+      @page {
+
+        size: A4 portrait;
+
+        margin: 10mm;
+
+      }
+
+
+
+      /* Sembunyikan seluruh halaman aplikasi */
+
+      body * {
+
+        visibility: hidden !important;
+
+      }
+
+
+
+      /* Tampilkan hanya dokumen surat */
+
+      #print-area,
+
+      #print-area * {
+
+        visibility: visible !important;
+
+      }
+
+
+
+      /* Atur posisi dan tampilan dokumen */
+
+      #print-area {
+
+        position: absolute !important;
+
+        left: 0 !important;
+
+        top: 0 !important;
+
+        width: 100% !important;
+
+        max-width: none !important;
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        border: none !important;
+
+        border-radius: 0 !important;
+
+        box-shadow: none !important;
+
+        background: white !important;
+
+        color: black !important;
+
+        -webkit-print-color-adjust: exact !important;
+
+        print-color-adjust: exact !important;
+
+      }
+
+
+
+      /* Sembunyikan kontrol aplikasi saat mencetak */
+
+      .no-print,
+
+      button,
+
+      aside,
+
+      nav {
+
+        display: none !important;
+
+      }
+
+
+
+      /* Pastikan isi dokumen tetap terlihat */
+
+      #print-area table,
+
+      #print-area tr,
+
+      #print-area td,
+
+      #print-area th,
+
+      #print-area div,
+
+      #print-area p,
+
+      #print-area h1,
+
+      #print-area h2 {
+
+        visibility: visible !important;
+
+      }
+
+
+
+      /* Hindari pemisahan tabel/baris bila memungkinkan */
+
+      #print-area table,
+
+      #print-area tr {
+
+        page-break-inside: avoid;
+
+        break-inside: avoid;
+
+      }
+
+
+
+      body {
+
+        margin: 0 !important;
+
+        padding: 0 !important;
+
+        background: white !important;
+
+      }
+
+    }
+
+
+
+    /* Template Dokumen Penunjukkan Asset */
+
+    .document-body {
+
+      font-family: Arial, Helvetica, sans-serif;
+
+      color: #000;
+
+      line-height: 1.3;
+
+    }
+
+    
+
+    .table-borderless td, .table-borderless th {
+
+      border: none;
+
+      padding: 3px 6px;
+
+    }
+
+
+
+    .doc-header-box {
+
+      border: 2px solid #002060;
+
+    }
+
+
+
+    .doc-blue-title {
+
+      color: #002060;
+
+      font-weight: bold;
+
+    }
+
+
+
+    /* ==================================================
+
+       PILIHAN TEMA WARNA TAMPILAN (THEMES)
+
+       ================================================== */
+
+    /* 1. Default Dark (Midnight Slate Bawaan) */
+
+    body.theme-default {
+
+      background: radial-gradient(circle at top right, #0f172a, #020617) !important;
+
+    }
+
+
+
+    /* 2. Tema Biru Campuran (Ocean Deep) */
+
+    body.theme-ocean {
+
+      background: radial-gradient(circle at top right, #0a192f, #020c1b) !important;
+
+    }
+
+    body.theme-ocean aside {
+
+      background-color: #0b1e36 !important;
+
+      border-color: rgba(30, 58, 138, 0.4) !important;
+
+    }
+
+    body.theme-ocean main {
+
+      background-color: #061224 !important;
+
+    }
+
+    body.theme-ocean header {
+
+      background-color: rgba(11, 30, 54, 0.9) !important;
+
+      border-color: rgba(30, 58, 138, 0.5) !important;
+
+    }
+
+    body.theme-ocean .bg-slate-900 {
+
+      background-color: #0f2744 !important;
+
+      border-color: rgba(30, 58, 138, 0.4) !important;
+
+    }
+
+  </style>
+
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
-        <!-- Header Aplikasi -->
-        <div class="border-b pb-4 mb-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Dashboard Control HCGA</h1>
-                <p class="text-sm text-gray-500">PT. Chandra Batuah Mustika Lestari</p>
-            </div>
-            <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition">
-                Refresh Data
-            </button>
+<body class="theme-default text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+
+
+  <!-- ==================== VIEW LOGIN (FULLSCREEN & REFRESHED) ==================== -->
+
+  <div id="login-view" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-4 sm:p-6">
+
+    <div class="w-full max-w-md bg-slate-900/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl shadow-cyan-950/30 flex flex-col justify-between min-h-[500px]">
+
+      
+
+      <!-- Logo Header -->
+
+      <div class="text-center mt-2">
+
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-tr from-blue-600 to-cyan-400 text-white rounded-2xl mb-4 shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10">
+
+          <i class="fa-solid fa-boxes-stacked text-3xl"></i>
+
         </div>
 
-        <!-- Status Loading -->
-        <div id="loading" class="text-center py-8 text-gray-500">
-            Memuat data dari sistem...
+        <h2 class="text-2xl font-extrabold text-white tracking-tight">Aset HCGA</h2>
+
+        <p class="text-xs text-cyan-400 mt-1 font-semibold uppercase tracking-wider">Aplikasi QR Aset HC & GA PT. CBML</p>
+
+      </div>
+
+
+
+      <!-- Alert Error -->
+
+      <div id="login-alert" class="hidden my-3 p-3.5 bg-red-950/80 text-red-200 border border-red-800/60 rounded-xl text-xs flex items-center gap-2.5 backdrop-blur-sm">
+
+        <i class="fa-solid fa-circle-exclamation text-red-400 text-base shrink-0"></i>
+
+        <span id="login-alert-text"></span>
+
+      </div>
+
+
+
+      <!-- Login Form -->
+
+      <form onsubmit="handleLogin(event)" class="space-y-4 my-auto">
+
+        <div>
+
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Username</label>
+
+          <div class="relative">
+
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+
+              <i class="fa-solid fa-user"></i>
+
+            </span>
+
+            <input type="text" id="login-username" required placeholder="Masukkan username" class="input-touch w-full pl-11 pr-4 bg-slate-800/80 border border-slate-700/80 rounded-2xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-slate-800 outline-none text-white transition placeholder-slate-500">
+
+          </div>
+
         </div>
 
-        <!-- Area Hasil Data -->
-        <div id="content" class="hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-700 uppercase text-xs">
-                            <th class="p-3 border-b">No</th>
-                            <th class="p-3 border-b">Nama / Item</th>
-                            <th class="p-3 border-b">Keterangan</th>
-                            <th class="p-3 border-b">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody" class="text-sm text-gray-600 divide-y">
-                        <!-- Data dari Google Sheet akan dimasukkan ke sini -->
-                    </tbody>
-                </table>
-            </div>
+
+
+        <div>
+
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5 tracking-wider">Password</label>
+
+          <div class="relative">
+
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+
+              <i class="fa-solid fa-lock"></i>
+
+            </span>
+
+            <input type="password" id="login-password" required placeholder="••••••••" class="input-touch w-full pl-11 pr-4 bg-slate-800/80 border border-slate-700/80 rounded-2xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:bg-slate-800 outline-none text-white transition placeholder-slate-500">
+
+          </div>
+
         </div>
+
+
+
+        <button type="submit" id="btn-login" class="btn-touch w-full bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-2xl shadow-lg shadow-blue-600/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2 mt-6">
+
+          <span>Masuk Aplikasi</span>
+
+          <i class="fa-solid fa-arrow-right"></i>
+
+        </button>
+
+      </form>
+
+
+
+      <!-- Footer Info -->
+
+      <div class="pt-4 border-t border-slate-800/60 text-center text-xs text-slate-500">
+
+        DEPT: <span class="font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-300">HC</span> & <span class="font-mono bg-slate-800 px-2 py-0.5 rounded text-slate-300">GA</span>
+
+      </div>
+
     </div>
 
-    <script>
-        // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwwkbYas5L_NWO82w54o5r-4xMFwtqHadyjT6LtHKl5K1dYoxsLSSKjJtDgZOhFkRKx9g/exec";
+  </div>
 
-        // Fungsi mengambil data dari Apps Script (doGet)
-        async function fetchData() {
-            const loadingEl = document.getElementById('loading');
-            const contentEl = document.getElementById('content');
+
+
+  <!-- ==================== VIEW APP MAIN (RESPONSIVE) ==================== -->
+
+  <div id="app-view" class="hidden min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-200">
+
+    
+
+    <!-- Sidebar Navigation (Desktop & Tablet) -->
+
+    <aside class="w-full md:w-64 bg-slate-900 border-r border-slate-800/80 flex-shrink-0 flex flex-col no-print">
+
+      
+
+      <!-- LOGO HCGA CUSTOM SIDEBAR -->
+
+      <div class="p-5 border-b border-slate-800/80 flex items-center gap-3">
+
+        <div class="relative w-14 h-10 shrink-0 rounded-full bg-[#00c4cc] border border-cyan-400/50 flex items-center justify-center overflow-hidden shadow-md">
+
+          <!-- Ring Oval Putih -->
+
+          <div class="absolute inset-1 rounded-full border-2 border-white/90"></div>
+
+          
+
+          <!-- Banner Putih Tengah -->
+
+          <div class="absolute inset-x-0 h-5 bg-white flex flex-col items-center justify-center border-y border-blue-900/20">
+
+            <!-- Tulisan HCGA -->
+
+            <span class="font-serif font-extrabold text-[#1e40af] text-[11px] leading-none tracking-widest">HCGA</span>
+
+            <!-- Subtitle Kecil -->
+
+            <span class="font-sans font-black text-[3px] text-black leading-none mt-[1px] tracking-tighter uppercase">Human Capital General Affair</span>
+
+          </div>
+
+          
+
+          <!-- Garis-garis Biru Samping Kiri & Kanan -->
+
+          <div class="absolute left-0.5 top-1/2 -translate-y-1/2 flex flex-col gap-[1px]">
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+          </div>
+
+          <div class="absolute right-0.5 top-1/2 -translate-y-1/2 flex flex-col gap-[1px]">
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+            <div class="w-2 h-[1px] bg-blue-600"></div>
+
+          </div>
+
+        </div>
+
+
+
+        <div>
+
+          <h1 class="text-sm font-bold text-white tracking-wide leading-tight">DATA ASET</h1>
+
+          <p class="text-[10px] text-cyan-400">PT. CBML Site Adaro</p>
+
+        </div>
+
+      </div>
+
+
+
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800/80 hover:text-white">
+
+          <i class="fa-solid fa-chart-pie w-5 text-center text-blue-400"></i>
+
+          <span>Dashboard</span>
+
+        </button>
+
+
+
+        <button onclick="switchTab('assets')" id="nav-assets" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800/80 hover:text-white">
+
+          <i class="fa-solid fa-box-archive w-5 text-center text-amber-400"></i>
+
+          <span>Data Aset</span>
+
+        </button>
+
+
+
+        <button onclick="switchTab('inspection')" id="nav-inspection" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800/80 hover:text-white">
+
+          <i class="fa-solid fa-qrcode w-5 text-center text-cyan-400"></i>
+
+          <span>Scan QR & Pemeriksaan</span>
+
+        </button>
+
+
+
+        <button onclick="switchTab('serah-terima')" id="nav-serah-terima" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800/80 hover:text-white">
+
+          <i class="fa-solid fa-file-signature w-5 text-center text-emerald-400"></i>
+
+          <span>Form Serah Terima</span>
+
+        </button>
+
+
+
+        <button onclick="switchTab('activity')" id="nav-activity" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800/80 hover:text-white">
+
+          <i class="fa-solid fa-list-check w-5 text-center text-violet-400"></i>
+
+          <span>Log Aktivitas</span>
+
+        </button>
+
+      </nav>
+
+
+
+      <div class="p-4 border-t border-slate-800 bg-slate-950/80 space-y-3">
+
+        <div class="flex items-center justify-between gap-2">
+
+          <!-- Profil User -->
+
+          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+
+            <div class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-cyan-400 shrink-0" id="user-avatar">
+
+              AD
+
+            </div>
+
+            <div class="truncate min-w-0 flex-1">
+
+              <p class="text-xs font-semibold text-white truncate" id="user-display-name">Admin</p>
+
+              <p class="text-[10px] text-slate-400" id="user-role">Administrator</p>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Tombol Pindah User / Admin -->
+
+          <button onclick="confirmSwitchUser()" title="Pindah User / Ganti Akun" class="p-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 hover:text-cyan-300 border border-slate-700 rounded-xl text-xs transition shrink-0 flex items-center justify-center">
+
+            <i class="fa-solid fa-user-gear"></i>
+
+          </button>
+
+        </div>
+
+        <!-- Tombol Keluar Aplikasi -->
+
+        <button onclick="confirmLogout()" title="Keluar Aplikasi" class="w-full py-2.5 px-3 bg-red-950/40 hover:bg-red-900/60 border border-red-800/50 text-red-300 hover:text-red-100 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+
+          <i class="fa-solid fa-right-from-bracket"></i>
+
+          <span>Keluar Aplikasi</span>
+
+        </button>
+
+      </div>
+
+    </aside>
+
+
+
+    <!-- Main Content Area -->
+
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-950">
+
+      
+
+      <!-- Top Header -->
+
+      <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 no-print shadow-sm sticky top-0 z-20">
+
+        <div>
+
+          <h2 class="text-lg font-bold text-white" id="page-title">Dashboard Aset</h2>
+
+          <p class="text-xs text-slate-400 mt-0.5" id="page-subtitle">Ringkasan statistik data aset terbaru</p>
+
+        </div>
+
+
+
+        <div class="flex items-center gap-2.5">
+
+          <!-- Dropdown Pilih Tema Warna Tampilan -->
+
+          <div class="relative">
+
+            <select id="theme-selector" onchange="changeAppTheme(this.value)" class="bg-slate-800/90 text-slate-200 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs font-medium outline-none focus:ring-2 focus:ring-cyan-500 cursor-pointer">
+
+              <option value="default">🌙 1. Dark Default</option>
+
+              <option value="ocean">🌊 2. Biru Campuran (Ocean)</option>
+
+            </select>
+
+          </div>
+
+
+
+          <!-- Realtime Clock -->
+
+          <div class="bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 text-xs font-medium text-slate-300 flex items-center gap-2">
+
+            <i class="fa-regular fa-clock text-cyan-400"></i>
+
+            <span id="current-timestamp">Loading...</span>
+
+          </div>
+
+
+
+          <button onclick="triggerSetupDatabase()" data-admin-only title="Setup Google Sheet" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-medium transition flex items-center gap-2 border border-slate-700">
+
+            <i class="fa-solid fa-database text-amber-400"></i>
+
+            <span class="hidden sm:inline">Setup Sheet</span>
+
+          </button>
+
+        </div>
+
+      </header>
+
+
+
+      <!-- Content Views Container -->
+
+      <div class="p-4 sm:p-6 flex-1 overflow-y-auto">
+
+        
+
+        <section id="view-dashboard" class="space-y-6">
+
+          
+
+          <!-- Summary Cards Grid -->
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+            <!-- Total Assets -->
+
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg flex items-center justify-between">
+
+              <div>
+
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jumlah Data Aset</p>
+
+                <h3 class="text-3xl font-extrabold text-white mt-1" id="stat-total-aset">0</h3>
+
+                <p class="text-[11px] text-slate-400 mt-1">Terdata dalam sistem</p>
+
+              </div>
+
+              <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
+
+                <i class="fa-solid fa-boxes-stacked"></i>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- Kondisi Baik -->
+
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg flex items-center justify-between">
+
+              <div>
+
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kondisi Baik</p>
+
+                <h3 class="text-3xl font-extrabold text-emerald-400 mt-1" id="stat-kondisi-baik">0</h3>
+
+                <p class="text-[11px] text-emerald-400/80 mt-1 font-medium">Siap Digunakan</p>
+
+              </div>
+
+              <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- Kondisi Rusak/Perbaikan -->
+
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg flex items-center justify-between">
+
+              <div>
+
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Perlu Perhatian / Rusak</p>
+
+                <h3 class="text-3xl font-extrabold text-amber-400 mt-1" id="stat-kondisi-rusak">0</h3>
+
+                <p class="text-[11px] text-amber-400/80 mt-1 font-medium">Perlu Maintenance</p>
+
+              </div>
+
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- Update Status -->
+
+            <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-lg flex items-center justify-between">
+
+              <div>
+
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Waktu Update Terakhir</p>
+
+                <p class="text-sm font-bold text-slate-200 mt-2 leading-snug" id="stat-last-update">-</p>
+
+                <p class="text-[10px] text-slate-400 mt-1">Realtime dari Database</p>
+
+              </div>
+
+              <div class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-xl">
+
+                <i class="fa-solid fa-arrows-rotate"></i>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Kategori Breakdown & Quick Info -->
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <div class="lg:col-span-2 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg">
+
+              <div class="flex items-center justify-between mb-4">
+
+                <h3 class="font-bold text-white text-base">Kategori Aset Perusahaan</h3>
+
+                <span class="text-xs text-slate-400">Breakdown Kategori</span>
+
+              </div>
+
+              <div id="kategori-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                <!-- Dynamically filled -->
+
+              </div>
+
+            </div>
+
+
+
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg flex flex-col justify-between">
+
+              <div>
+
+                <h3 class="font-bold text-white text-base mb-2">Aksi Cepat</h3>
+
+                <p class="text-xs text-slate-400 mb-4">Pilih tindakan yang sering dilakukan untuk mempermudah operasional GA & HC.</p>
+
+                
+
+                <div class="space-y-2.5">
+
+                  <button onclick="openAddAssetModal()" class="w-full text-left p-3.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 hover:text-cyan-400 border border-slate-700/60 text-xs font-medium transition flex items-center justify-between text-slate-300">
+
+                    <span><i class="fa-solid fa-plus text-cyan-400 mr-2"></i> Tambah Data Aset Baru</span>
+
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+
+                  </button>
+
+                  <button onclick="switchTab('serah-terima')" class="w-full text-left p-3.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 hover:text-emerald-400 border border-slate-700/60 text-xs font-medium transition flex items-center justify-between text-slate-300">
+
+                    <span><i class="fa-solid fa-print text-emerald-400 mr-2"></i> Cetak Form Serah Terima</span>
+
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+
+
+              <div class="mt-6 p-3.5 bg-blue-950/40 border border-blue-800/40 rounded-xl text-xs text-blue-300">
+
+                <p class="font-semibold"><i class="fa-solid fa-circle-info mr-1"></i> Informasi Database</p>
+
+                <p class="text-[11px] mt-0.5 text-blue-400">Data terhubung langsung dengan Google Sheet Apps Script Backend.</p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- VIEW DATA ASSETS -->
+
+        <section id="view-assets" class="hidden space-y-4">
+
+          <!-- Action Bar & Filter -->
+
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
+
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+
+              <div class="relative w-full sm:w-80">
+
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 text-xs">
+
+                  <i class="fa-solid fa-magnifying-glass"></i>
+
+                </span>
+
+                <input type="text" id="search-asset" onkeyup="filterAssets()" placeholder="Cari Kode, Nama, PIC, S/N..." class="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-cyan-500 focus:bg-slate-800 outline-none text-white placeholder-slate-400">
+
+              </div>
+
+
+
+              <select id="filter-kategori" onchange="filterAssets()" class="py-2 px-3 bg-slate-800 border border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-cyan-500 text-white">
+
+                <option value="">Semua Kategori</option>
+
+              </select>
+
+            </div>
+
+
+
+            <div class="flex flex-wrap items-center justify-end gap-2 w-full sm:w-auto">
+
+              <button onclick="openQrLabelOptions()" class="px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2" title="Cetak semua label atau cari berdasarkan nama/NRP karyawan">
+
+                <i class="fa-solid fa-qrcode"></i><span>Cetak QR / Label</span>
+
+              </button>
+
+              <button onclick="exportAssetsExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+
+                <i class="fa-solid fa-file-excel"></i><span>Export Excel</span>
+
+              </button>
+
+              <button onclick="printAssetsReport()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2">
+
+                <i class="fa-solid fa-file-pdf"></i><span>Laporan PDF</span>
+
+              </button>
+
+              <button onclick="openAddAssetModal()" data-admin-only class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow">
+
+                <i class="fa-solid fa-circle-plus"></i><span>Tambah Aset Baru</span>
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- Assets Table Card -->
+
+          <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-md overflow-hidden">
+
+            <div class="overflow-x-auto">
+
+              <table class="w-full text-left border-collapse text-xs">
+
+                <thead>
+
+                  <tr class="bg-slate-800/90 text-slate-300 font-semibold uppercase tracking-wider border-b border-slate-700/80">
+
+                    <th class="p-3 text-center">No</th>
+
+                    <th class="p-3">Kode Aset</th>
+
+                    <th class="p-3">Nama Aset</th>
+
+                    <th class="p-3">Merk / Model</th>
+
+                    <th class="p-3">S/N</th>
+
+                    <th class="p-3">ID / PIC Barang</th>
+
+                    <th class="p-3">Kondisi</th>
+
+                    <th class="p-3">Lokasi</th>
+
+                    <th class="p-3">Tgl Serah</th>
+
+                    <th class="p-3 text-center">Aksi</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="asset-table-body" class="divide-y divide-slate-800/60">
+
+                  <!-- JS dynamically populated -->
+
+                </tbody>
+
+              </table>
+
+            </div>
+
             
-            loadingEl.classList.remove('hidden');
-            contentEl.classList.add('hidden');
 
-            try {
-                const response = await fetch(`${GAS_URL}?action=getData`);
-                const result = await response.json();
+            <div id="asset-table-empty" class="p-8 text-center text-slate-500 hidden">
 
-                if (result.status === "success") {
-                    renderTable(result.data);
-                    loadingEl.classList.add('hidden');
-                    contentEl.classList.remove('hidden');
-                } else {
-                    alert("Gagal mengambil data dari server.");
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                loadingEl.innerText = "Terjadi kesalahan koneksi ke server.";
-            }
+              <i class="fa-solid fa-box-open text-4xl mb-2 text-slate-600"></i>
+
+              <p class="text-xs">Tidak ada data aset yang cocok.</p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- VIEW SCANNER & INSPECTION -->
+
+        <section id="view-inspection" class="hidden space-y-5">
+
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+
+              <div>
+
+                <h3 class="font-bold text-white text-base">Scan QR & Pemeriksaan Fisik</h3>
+
+                <p class="text-xs text-slate-400 mt-1">Arahkan kamera ke QR Code aset untuk memeriksa status fisik lapangan.</p>
+
+              </div>
+
+              <div class="flex gap-2">
+
+                <button onclick="startAssetScanner()" class="px-3 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
+
+                  <i class="fa-solid fa-camera"></i> Kamera
+
+                </button>
+
+                <button onclick="stopAssetScanner()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+
+                  <i class="fa-solid fa-stop"></i> Stop
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+
+            <!-- Frame Kamera Overlay -->
+
+            <div id="asset-qr-reader" class="mt-4 w-full max-w-lg mx-auto overflow-hidden rounded-2xl relative border-2 border-cyan-500/40 shadow-xl bg-slate-950 min-h-[220px] flex items-center justify-center">
+
+              <div class="scan-laser"></div>
+
+              <div class="text-center p-6">
+
+                <i class="fa-solid fa-qrcode text-5xl text-cyan-400/40 mb-2"></i>
+
+                <p class="text-xs text-slate-400">Area Pemindaian QR Kamera</p>
+
+              </div>
+
+            </div>
+
+
+
+            <p id="scan-status" class="text-xs text-slate-400 text-center mt-3">Pemindai dibuka di tab terpisah atau gunakan kamera langsung jika diizinkan browser.</p>
+
+            
+
+            <div class="mt-5 border-t border-slate-800 pt-4">
+
+              <label for="inspection-code" class="block text-xs font-semibold text-slate-300 mb-1.5">Atau masukkan kode aset manual</label>
+
+              <div class="flex gap-2">
+
+                <input id="inspection-code" type="text" inputmode="numeric" placeholder="Contoh: 225" class="min-w-0 flex-1 px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-cyan-500 outline-none">
+
+                <button type="button" onclick="lookupInspectionAsset()" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold">Cari Aset</button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+
+          <div id="inspection-detail-card" class="hidden bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
+
+            <div class="flex items-start justify-between gap-3 mb-4">
+
+              <div>
+
+                <p class="text-[10px] uppercase tracking-wider font-bold text-cyan-400">Detail Aset Terverifikasi</p>
+
+                <h3 id="inspection-asset-title" class="text-lg font-bold text-white mt-0.5">-</h3>
+
+                <p id="inspection-asset-subtitle" class="text-xs text-slate-400">-</p>
+
+              </div>
+
+              <span id="inspection-asset-condition" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">-</span>
+
+            </div>
+
+
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="inspection-asset-fields"></div>
+
+
+
+            <form id="inspection-form" onsubmit="submitInspectionForm(event)" class="mt-5 border-t border-slate-800 pt-5 space-y-4">
+
+              <h4 class="font-bold text-white">Hasil Pemeriksaan Fisik</h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+
+                <div>
+
+                  <label class="block font-semibold text-slate-300 mb-1">Tanggal pemeriksaan *</label>
+
+                  <input id="inspection-date" type="date" required class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
+
+                </div>
+
+                <div>
+
+                  <label class="block font-semibold text-slate-300 mb-1">Hasil pemeriksaan *</label>
+
+                  <select id="inspection-result" required onchange="handleInspectionResultChange()" class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
+
+                    <option value="">Pilih hasil</option>
+
+                    <option value="Sesuai">Sesuai data master</option>
+
+                    <option value="PIC Berbeda">PIC berbeda</option>
+
+                    <option value="Lokasi Berbeda">Lokasi berbeda</option>
+
+                    <option value="Kondisi Berubah">Kondisi berubah</option>
+
+                    <option value="Tidak Sesuai">Ada ketidaksesuaian lain</option>
+
+                    <option value="Tidak Ditemukan">Aset tidak ditemukan secara fisik</option>
+
+                  </select>
+
+                </div>
+
+                <div>
+
+                  <label class="block font-semibold text-slate-300 mb-1">PIC aktual *</label>
+
+                  <input id="inspection-pic" list="inspection-employee-list" required maxlength="250" class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none" placeholder="Pilih / ketik nama PIC">
+
+                  <datalist id="inspection-employee-list"></datalist>
+
+                </div>
+
+                <div>
+
+                  <label class="block font-semibold text-slate-300 mb-1">Lokasi aktual *</label>
+
+                  <input id="inspection-location" required maxlength="250" class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none" placeholder="Lokasi aset saat diperiksa">
+
+                </div>
+
+                <div>
+
+                  <label class="block font-semibold text-slate-300 mb-1">Kondisi aktual *</label>
+
+                  <select id="inspection-condition" required class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
+
+                    <option value="">Pilih kondisi</option>
+
+                    <option>Baik</option>
+
+                    <option>Rusak Ringan</option>
+
+                    <option>Rusak Berat</option>
+
+                    <option>Dalam Perbaikan</option>
+
+                    <option>Tidak Ditemukan</option>
+
+                  </select>
+
+                </div>
+
+                <div class="sm:col-span-2">
+
+                  <label class="block font-semibold text-slate-300 mb-1">Catatan / tindak lanjut</label>
+
+                  <textarea id="inspection-notes" rows="3" maxlength="2000" class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none" placeholder="Contoh: perlu update PIC, pindah lokasi, atau perbaikan"></textarea>
+
+                </div>
+
+              </div>
+
+
+
+              <div id="inspection-form-status" class="hidden rounded-xl p-3 text-xs"></div>
+
+              
+
+              <div class="flex flex-col sm:flex-row gap-2">
+
+                <button id="btn-submit-inspection" type="submit" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow">
+
+                  <i class="fa-solid fa-floppy-disk"></i> Simpan Pemeriksaan
+
+                </button>
+
+                <button type="button" onclick="resetInspectionForm()" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700">Pemeriksaan Baru</button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+
+
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md">
+
+            <div class="flex items-center justify-between gap-3 mb-3">
+
+              <div>
+
+                <h3 class="font-bold text-white text-base">Riwayat Pemeriksaan Aset Terpilih</h3>
+
+                <p class="text-xs text-slate-400">Riwayat akan tampil setelah kode aset ditemukan.</p>
+
+              </div>
+
+              <button type="button" onclick="lookupInspectionAsset()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-semibold border border-slate-700 text-slate-300">Refresh</button>
+
+            </div>
+
+            <div id="inspection-history" class="text-xs text-slate-500">Belum ada aset dipilih.</div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- VIEW ACTIVITY LOG -->
+
+        <section id="view-activity" class="hidden space-y-4">
+
+          <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+
+            <div>
+
+              <h3 class="font-bold text-white">Log Aktivitas Aplikasi</h3>
+
+              <p class="text-xs text-slate-400 mt-0.5">Catatan audit login & histori operasional.</p>
+
+            </div>
+
+            <div class="flex gap-2">
+
+              <button onclick="loadActivityLog()" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5">
+
+                <i class="fa-solid fa-rotate"></i> Refresh
+
+              </button>
+
+              <button data-admin-only onclick="clearActivityLog()" class="px-3 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow">
+
+                <i class="fa-solid fa-trash-can"></i> Clear Histori
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+
+          <div class="bg-slate-900 rounded-2xl border border-slate-800 shadow-md overflow-hidden">
+
+            <div class="overflow-x-auto">
+
+              <table class="w-full text-left border-collapse text-xs">
+
+                <thead>
+
+                  <tr class="bg-slate-800 text-slate-300 border-b border-slate-700">
+
+                    <th class="p-3">Waktu</th>
+
+                    <th class="p-3">Username</th>
+
+                    <th class="p-3">Role</th>
+
+                    <th class="p-3">Aktivitas</th>
+
+                    <th class="p-3">Detail</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="activity-table-body" class="divide-y divide-slate-800/60">
+
+                  <tr><td colspan="5" class="p-6 text-center text-slate-500">Klik Refresh untuk memuat log.</td></tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+
+        <!-- VIEW FORM SERAH TERIMA -->
+
+        <section id="view-serah-terima" class="hidden space-y-6">
+
+          <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-md flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+
+            <div class="flex items-center gap-3 w-full md:w-auto">
+
+              <label class="text-xs font-semibold text-slate-300 whitespace-nowrap">Pilih Aset untuk Surat:</label>
+
+              <select id="select-asset-assignment" onchange="loadAssignmentForm()" class="w-full md:w-80 py-2 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs outline-none focus:ring-2 focus:ring-cyan-500">
+
+                <!-- Dynamically loaded options -->
+
+              </select>
+
+            </div>
+
+
+
+            <button onclick="window.print()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2 shadow">
+
+              <i class="fa-solid fa-print"></i>
+
+              <span>Cetak / Save PDF</span>
+
+            </button>
+
+          </div>
+
+
+
+          <!-- PRINTABLE OFFICIAL DOCUMENT -->
+
+          <div id="print-area" class="bg-white p-6 md:p-10 rounded-2xl border border-slate-300 shadow-xl max-w-4xl mx-auto document-body text-slate-900">
+
+            
+
+            <!-- Header Table Kop Surat -->
+
+            <table class="w-full border-collapse doc-header-box mb-4">
+
+              <tr>
+
+                <td class="w-24 p-2 text-center border-r border-blue-900 align-middle">
+
+                 <div class="font-bold text-blue-900 text-xl border-2 border-blue-900 rounded-full w-[82px] h-[82px] flex items-center justify-center mx-auto whitespace-nowrap">
+
+                    CBML
+
+                  </div>
+
+                </td>
+
+                <td class="p-2 border-r border-blue-900 align-middle">
+
+                  <h1 class="text-lg font-extrabold doc-blue-title leading-tight">PT. CHANDRA BATUAH MUSTIKA LESTARI</h1>
+
+                  <p class="text-xs font-bold doc-blue-title tracking-widest">GENERAL SUPPLY & CONTRACTOR</p>
+
+                </td>
+
+                <td class="p-2 text-[10px] text-blue-950 align-top w-72 leading-tight">
+
+                  <p class="font-bold">Kantor Pusat :</p>
+
+                  <p>Jl. Simpang Sei Mesa RT. 13 No. 152</p>
+
+                  <p>Banjarmasin Kalimantan Selatan</p>
+
+                  <p>Telp. : 0511 3266198 Fax. 0511 3266198</p>
+
+                  <hr class="my-1 border-blue-900">
+
+                  <p class="font-bold">Kantor Cabang :</p>
+
+                  <p>Hauling Road Paringin Lama KM. 96 Kawasan Risa</p>
+
+                  <p>PT. Adaro Persada Mandiri</p>
+
+                  <p>Balangan - Kalsel</p>
+
+                </td>
+
+              </tr>
+
+            </table>
+
+
+
+            <!-- Title Section -->
+
+            <div class="text-center my-6">
+
+              <h2 class="text-base font-extrabold text-black uppercase underline tracking-wide">PENUNJUKKAN ASET PERUSAHAAN (ASSIGNMENT)</h2>
+
+              <p class="text-xs font-bold text-black mt-1">
+
+                REFERENSI KODE PROSES PENUNJUKKAN : <span id="doc-ref-kode" class="font-mono">CBML/GA/HANDY TALKY/225</span>
+
+              </p>
+
+            </div>
+
+
+
+            <!-- Employee Info Block -->
+
+            <div class="mb-4">
+
+              <p class="text-xs font-semibold mb-2">Diberikan penunjukkan penggunaan asset perusahaan kepada ;</p>
+
+              <table class="w-full text-xs table-borderless">
+
+                <tr class="align-top">
+
+                  <td class="w-32 font-bold">NRP</td>
+
+                  <td class="w-4 text-center">:</td>
+
+                  <td class="font-bold font-mono" id="doc-nrp">CB.1106.0304</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Nama</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-nama">Sukardiyono</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Jabatan</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-jabatan">Foreman Plant</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Unit Bisnis</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-unit">PT. Chandra Batuah Mustika Lestari</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Divisi</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-divisi">PLANT</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Lokasi</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-lokasi">CBML Site Adaro</td>
+
+                </tr>
+
+              </table>
+
+            </div>
+
+
+
+            <!-- Asset Info Block -->
+
+            <div class="mb-6">
+
+              <p class="text-xs font-semibold mb-2">Informasi Aset Perusahaan yang Menjadi Tanggung Jawab Anda Selama Masa Penunjukkan ;</p>
+
+              <table class="w-full text-xs table-borderless">
+
+                <tr class="align-top">
+
+                  <td class="w-44 font-bold">Kode Aset</td>
+
+                  <td class="w-4 text-center">:</td>
+
+                  <td class="font-bold font-mono" id="doc-kode-asset">225</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Tipe Aset</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold uppercase" id="doc-tipe-asset">HARDWARE</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Kategori Aset</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold uppercase" id="doc-kategori-asset">HANDY TALKY</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Merek</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold uppercase" id="doc-merk">MOTOROLA</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Model & Ket</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-model">Motorola Solutions Portable (AZH03KEK8AA9) TANAPA PMUD2437AAA R03.05 CP1660 VHF</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Serial Number</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold font-mono" id="doc-sn">1335UB1432</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Umur Aset</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-umur">0 Years 0 months 0 day</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Tanggal diterima dari HO</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-tgl-ho">01 Juli 2026</td>
+
+                </tr>
+
+                <tr class="align-top">
+
+                  <td class="font-bold">Tanggal Penyerahan Aset</td>
+
+                  <td class="text-center">:</td>
+
+                  <td class="font-bold" id="doc-tgl-serah">01 Juli 2026</td>
+
+                </tr>
+
+              </table>
+
+            </div>
+
+
+
+            <!-- Notes Section -->
+
+            <div class="mb-8 text-xs space-y-1 text-justify">
+
+              <p class="font-bold">Catatan Penting ;</p>
+
+              <ol class="list-lower-alpha pl-5 space-y-1">
+
+                <li>Untuk melihat asset yang menjadi tanggung jawab anda silahkan kunjungi <span class="text-blue-700 underline">mis.sa174.com</span>.</li>
+
+                <li>Apabila secara fisik / kenyataannya anda tidak menggunakan asset tsb, segera email ke <span class="text-blue-700 underline">mis@sinaralam.com</span> untuk pengklarifikasian Sdsada.</li>
+
+                <li>Ini adalah Proses dan Bukti SAH sebagai acuan dan dasar apabila terjadi proses yang memerlukan pertanggung jawaban dan pertanggung gugatan terhadap pihak terkait.</li>
+
+                <li>Jika memerlukan informasi, pertanyaan dan berkaitan dengan subject tsb silahkan menghubungi melalui email ke <span class="text-blue-700 underline">mis@sinaralam.com</span> atau bisa menghubungi HCGA Dept.</li>
+
+                <li>Penerima Aset bertanggung jawab sepenuhnya atas barang/aset yang diterima. Jika terjadi kerusakan / kehilangan penerima aset bersedia untuk mengganti rugi atas aset tersebut.</li>
+
+              </ol>
+
+            </div>
+
+
+
+            <!-- Signatures Section -->
+
+            <div class="grid grid-cols-2 gap-8 text-xs text-center mt-12">
+
+              <div>
+
+                <p class="font-bold mb-16">Yang Memberikan,</p>
+
+                <div class="grid grid-cols-2 gap-2">
+
+                  <div>
+
+                    <p class="font-bold border-b border-black pb-0.5" id="doc-pemberi-1">Faisal</p>
+
+                    <p class="text-[11px]" id="doc-pemberi-1-jab">Foreman HC</p>
+
+                  </div>
+
+                  <div>
+
+                    <p class="font-bold border-b border-black pb-0.5" id="doc-pemberi-2">Junaidi</p>
+
+                    <p class="text-[11px]" id="doc-pemberi-2-jab">GA Officer</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+
+              <div>
+
+                <p class="font-bold mb-16">Yang Menerima,</p>
+
+                <div class="grid grid-cols-2 gap-2">
+
+                  <div>
+
+                    <p class="font-bold border-b border-black pb-0.5" id="doc-penerima-1">Sukardiyono</p>
+
+                    <p class="text-[11px]" id="doc-penerima-1-jab">Foreman Plant</p>
+
+                  </div>
+
+                  <div>
+
+                    <p class="font-bold border-b border-black pb-0.5" id="doc-penerima-2">Tomineus</p>
+
+                    <p class="text-[11px]" id="doc-penerima-2-jab">Penanggung Jawab Operasional</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+
+          </div>
+
+        </section>
+
+
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+
+  <!-- MODAL ASSET -->
+
+  <div id="modal-asset" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden no-print">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden text-slate-200">
+
+      <div class="p-4 px-6 bg-slate-800 text-white flex justify-between items-center border-b border-slate-700">
+
+        <h3 class="font-bold text-base" id="modal-title">Form Input Aset Baru</h3>
+
+        <button onclick="closeAssetModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+      </div>
+
+
+
+      <form onsubmit="handleSaveAsset(event)" class="p-6 overflow-y-auto space-y-4 text-xs flex-1">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Kode Aset</label>
+
+            <input type="text" id="form-kode" readonly class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none font-mono font-bold text-cyan-400">
+
+            <p id="form-kode-help" class="mt-1 text-[10px] text-slate-400">
+
+              Kode aset dibuat otomatis sesuai urutan.
+
+            </p>
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Nama Aset *</label>
+
+            <input type="text" id="form-nama" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-cyan-500 text-white">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Kategori *</label>
+
+            <input type="text" id="form-kategori" placeholder="e.g. HANDY TALKY" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Tipe Aset</label>
+
+            <input type="text" id="form-tipe" value="HARDWARE" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Merk *</label>
+
+            <input type="text" id="form-merk" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+        </div>
+
+
+
+        <div>
+
+          <label class="block font-semibold text-slate-300 mb-1">Model & Keterangan Rinci</label>
+
+          <textarea id="form-model" rows="2" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white"></textarea>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Serial Number (S/N) *</label>
+
+            <input type="text" id="form-sn" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Kondisi Barang *</label>
+
+            <select id="form-kondisi" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+              <option value="Baik">Baik</option>
+
+              <option value="Rusak Ringan">Rusak Ringan</option>
+
+              <option value="Rusak Berat">Rusak Berat</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+
+        <hr class="my-2 border-slate-800">
+
+        <p class="font-bold text-white">Detail Penanggung Jawab / PIC (Karyawan)</p>
+
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">ID Karyawan (NRP)</label>
+
+            <input type="text" id="form-nrp" placeholder="CB.1106.XXXX" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Nama PIC Barang *</label>
+
+            <input type="text" id="form-pic" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Jabatan</label>
+
+            <input type="text" id="form-jabatan" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Divisi</label>
+
+            <input type="text" id="form-divisi" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Lokasi Barang *</label>
+
+            <input type="text" id="form-lokasi" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+        </div>
+
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Tanggal Diterima HO *</label>
+
+            <input type="date" id="form-tgl-ho" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+          <div>
+
+            <label class="block font-semibold text-slate-300 mb-1">Tanggal Penyerahan Aset</label>
+
+            <input type="date" id="form-tgl-serah" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none text-white">
+
+          </div>
+
+        </div>
+
+
+
+        <hr class="my-2 border-slate-800">
+
+        <p class="font-bold text-white">Penandatangan Serah Terima</p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Yang Memberikan 1</label><input type="text" id="form-pemberi-1" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Yang Memberikan 2</label><input type="text" id="form-pemberi-2" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Yang Menerima 2</label><input type="text" id="form-penerima-2" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+        </div>
+
+
+
+        <div class="pt-4 flex justify-end gap-2">
+
+          <button type="button" onclick="closeAssetModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-semibold border border-slate-700">Batal</button>
+
+          <button type="submit" id="btn-save-asset" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white rounded-xl font-semibold shadow">Simpan Data</button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- MODAL TRANSFER PIC -->
+
+  <div id="modal-transfer-pic" class="fixed inset-0 z-[70] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden no-print">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden text-slate-200">
+
+      <div class="p-4 px-6 bg-violet-700 text-white flex justify-between items-center">
+
+        <div><h3 class="font-bold text-base">Perpindahan PIC Aset</h3><p id="transfer-current-pic" class="text-[11px] text-violet-100 mt-0.5"></p></div>
+
+        <button type="button" onclick="closeTransferPicModal()" class="text-violet-100 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+
+      </div>
+
+      <form onsubmit="submitTransferPic(event)" class="p-6 overflow-y-auto space-y-4 text-xs">
+
+        <input type="hidden" id="transfer-kode">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Tanggal Perpindahan *</label><input id="transfer-tanggal" type="date" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Alasan Perpindahan *</label><select id="transfer-alasan" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"><option value="">Pilih alasan</option><option>Mutasi karyawan</option><option>Mutasi divisi/lokasi</option><option>Resign / karyawan keluar</option><option>Penggantian perangkat</option><option>Pengembalian ke General Affairs</option><option>Perubahan penanggung jawab</option><option>Lainnya</option></select></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Nama PIC Baru *</label><input id="transfer-pic" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">NRP PIC Baru</label><input id="transfer-nrp" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white" placeholder="Nomor karyawan"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Jabatan Baru</label><input id="transfer-jabatan" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div><label class="block font-semibold text-slate-300 mb-1">Divisi Baru</label><input id="transfer-divisi" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div class="sm:col-span-2"><label class="block font-semibold text-slate-300 mb-1">Lokasi Aset Baru *</label><input id="transfer-lokasi" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"></div>
+
+          <div class="sm:col-span-2"><label class="block font-semibold text-slate-300 mb-1">Catatan / Keterangan</label><textarea id="transfer-catatan" rows="3" class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white" placeholder="Catatan fisik perangkat atau kelengkapan..."></textarea></div>
+
+        </div>
+
+        <p class="text-[11px] text-amber-300 bg-amber-950/40 border border-amber-800/40 rounded-xl p-3"><i class="fa-solid fa-circle-info mr-1"></i> PIC lama dan PIC baru akan otomatis dicatat di HistoriPIC.</p>
+
+        <div class="flex justify-end gap-2"><button type="button" onclick="closeTransferPicModal()" class="px-4 py-2 bg-slate-800 rounded-xl font-semibold border border-slate-700">Batal</button><button type="submit" id="btn-transfer-pic" class="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold">Simpan Perpindahan</button></div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- MODAL HISTORI PIC -->
+
+  <div id="modal-pic-history" class="fixed inset-0 z-[75] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden no-print">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden text-slate-200">
+
+      <div class="p-4 px-6 bg-slate-800 text-white flex justify-between items-center border-b border-slate-700"><div><h3 class="font-bold text-base">Histori Pemegang / PIC Aset</h3><p id="history-asset-title" class="text-[11px] text-slate-400 mt-0.5"></p></div><button type="button" onclick="closePicHistory()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button></div>
+
+      <div class="p-4 overflow-auto"><div id="pic-history-content" class="text-xs text-slate-400">Memuat histori...</div></div>
+
+      <div class="p-4 border-t border-slate-800 flex justify-end"><button type="button" onclick="closePicHistory()" class="px-4 py-2 bg-slate-800 rounded-xl font-semibold text-xs border border-slate-700">Tutup</button></div>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- MODAL EDIT KODE ASET -->
+
+  <div id="modal-edit-kode" class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden no-print">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden text-slate-200">
+
+      <div class="p-4 px-6 bg-amber-600 text-white flex justify-between items-center">
+
+        <div>
+
+          <h3 class="font-bold text-base">Edit Kode Aset</h3>
+
+          <p class="text-[11px] text-amber-100 mt-0.5">Ubah nomor kode tanpa membuat data aset baru.</p>
+
+        </div>
+
+        <button type="button" onclick="closeEditKodeModal()" class="text-amber-100 hover:text-white">
+
+          <i class="fa-solid fa-xmark text-lg"></i>
+
+        </button>
+
+      </div>
+
+
+
+      <form onsubmit="handleUpdateAssetCode(event)" class="p-6 space-y-4 text-xs">
+
+        <div>
+
+          <label class="block font-semibold text-slate-300 mb-1">Kode Aset Lama</label>
+
+          <input type="text" id="edit-old-kode" readonly class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none font-mono font-bold text-slate-400">
+
+        </div>
+
+
+
+        <div>
+
+          <label class="block font-semibold text-slate-300 mb-1">Kode Aset Baru *</label>
+
+          <input type="number" id="edit-new-kode" min="1" step="1" required class="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 font-mono font-bold text-white">
+
+          <p class="mt-1 text-[10px] text-slate-400">
+
+            Kode harus berupa angka dan belum dipakai aset lain.
+
+          </p>
+
+        </div>
+
+
+
+        <div class="pt-2 flex justify-end gap-2">
+
+          <button type="button" onclick="closeEditKodeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-300 font-semibold border border-slate-700">
+
+            Batal
+
+          </button>
+
+          <button type="submit" id="btn-update-kode" class="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-semibold shadow">
+
+            Simpan Kode
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+
+  <!-- MODAL CETAK QR / LABEL -->
+  <div id="modal-qr-label" class="fixed inset-0 z-[90] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden text-slate-200">
+      <div class="p-5 bg-violet-700 text-white flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base">Cetak QR / Label Aset</h3>
+          <p class="text-xs text-violet-100 mt-0.5">Pilih format cetak label tempel kecil atau label standar.</p>
+        </div>
+        <button type="button" onclick="closeQrLabelOptions()" class="text-white hover:text-violet-100"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        
+        <!-- Opsi Pilihan Mode Cetak -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button type="button" onclick="printAllQrLabels('sticker')" class="p-3.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-800/60 text-cyan-300 font-semibold text-xs flex flex-col items-center justify-center gap-2">
+            <i class="fa-solid fa-tag text-xl"></i>
+            <span>Cetak Label Tempel Kecil (<span id="qr-total-assets-sticker">0</span> label)</span>
+          </button>
+          <button type="button" onclick="printAllQrLabels('standard')" class="p-3.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 border border-violet-800/60 text-violet-300 font-semibold text-xs flex flex-col items-center justify-center gap-2">
+            <i class="fa-solid fa-qrcode text-xl"></i>
+            <span>Cetak Label Standar (<span id="qr-total-assets-std">0</span> label)</span>
+          </button>
+        </div>
+
+        <div class="border-t border-slate-800 pt-4">
+          <label for="qr-person-search" class="block text-xs font-semibold text-slate-300 mb-2">Cetak per orang — cari nama / NRP karyawan</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input id="qr-person-search" type="text" oninput="searchQrLabelPeople()" placeholder="Ketik nama PIC atau NRP..." class="w-full pl-10 pr-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm outline-none text-white focus:ring-2 focus:ring-violet-500">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Pilih karyawan untuk mencetak seluruh label aset yang menjadi tanggung jawabnya.</p>
+          <div id="qr-person-results" class="mt-3 space-y-2">
+            <p class="text-xs text-slate-500 text-center py-4">Ketik nama atau NRP untuk mencari karyawan.</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-slate-800 flex justify-end">
+        <button type="button" onclick="closeQrLabelOptions()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SCRIPT LOGIC PERIHAL APLIKASI UTAMA -->
+
+  <script>
+
+    // State Application Variables
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwwkbYas5L_NWO82w54o5r-4xMFwtqHadyjT6LtHKl5K1dYoxsLSSKjJtDgZOhFkRKx9g/exec";
+
+    let currentUser = null;
+
+    let sessionToken = null;
+
+    let currentInspectionAsset = null;
+
+    const QR_SCANNER_URL = 'https://edy-gup.github.io/hcga-qr-scanner/';
+
+    let qrScannerWindow = null;
+
+    let qrScannerOrigin = '';
+
+    let rawAssetsList = [];
+
+
+
+    // On Page Initialization
+
+    window.onload = function() {
+
+      startRealtimeClock();
+
+      initAppTheme();
+
+    };
+
+
+
+    /* --- FUNGSI PILIHAN TEMA WARNA TAMPILAN --- */
+
+    function changeAppTheme(themeName) {
+
+      document.body.classList.remove('theme-default', 'theme-ocean', 'theme-skyline');
+
+      document.body.classList.add('theme-' + themeName);
+
+      localStorage.setItem('cbml_app_theme', themeName);
+
+    }
+
+
+
+    function initAppTheme() {
+
+      const savedTheme = localStorage.getItem('cbml_app_theme') || 'default';
+
+      const selector = document.getElementById('theme-selector');
+
+      if (selector) selector.value = savedTheme;
+
+      changeAppTheme(savedTheme);
+
+    }
+
+
+
+    // Helper to format Date string
+
+    function formatDateIndo(dateStr) {
+
+      if (!dateStr) return '-';
+
+      const d = new Date(dateStr);
+
+      if (isNaN(d.getTime())) return dateStr;
+
+      
+
+      const monthNames = [
+
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+
+      ];
+
+      const day = String(d.getDate()).padStart(2, '0');
+
+      const month = monthNames[d.getMonth()];
+
+      const year = d.getFullYear();
+
+      return `${day} ${month} ${year}`;
+
+    }
+
+
+
+    function calculateAssetAge(dateStr) {
+
+      if (!dateStr) return 'Tanggal diterima HO belum diisi';
+
+      const start = new Date(String(dateStr).slice(0,10) + 'T00:00:00');
+
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      if (isNaN(start.getTime()) || start > today) return 'Tanggal tidak valid';
+
+      let years = today.getFullYear() - start.getFullYear();
+
+      let months = today.getMonth() - start.getMonth();
+
+      let days = today.getDate() - start.getDate();
+
+      if (days < 0) { months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+
+      if (months < 0) { years--; months += 12; }
+
+      return `${years} tahun ${months} bulan ${days} hari`;
+
+    }
+
+    function applyRoleUI() {
+
+      const isAdmin = currentUser && currentUser.role === 'Admin';
+
+      document.querySelectorAll('[data-admin-only]').forEach(el => el.classList.toggle('hidden', !isAdmin));
+
+      document.querySelectorAll('button[onclick="openAddAssetModal()"]').forEach(el => el.classList.toggle('hidden', !isAdmin));
+
+    }
+
+    function escapeHTML(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+
+
+    // Realtime Clock Updater
+
+    function startRealtimeClock() {
+
+      const updateClock = () => {
+
+        const now = new Date();
+
+        const options = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+
+        document.getElementById('current-timestamp').innerText = now.toLocaleDateString('id-ID', options);
+
+      };
+
+      updateClock();
+
+      setInterval(updateClock, 1000);
+
+    }
+
+
+
+    /* --- LOGIN & AUTH HANDLER --- */
+
+    /* --- LOGIN & AUTH HANDLER --- */
+    async function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-username').value;
+      const p = document.getElementById('login-password').value;
+      const btn = document.getElementById('btn-login');
+      const alertBox = document.getElementById('login-alert');
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span> Memeriksa...</span>';
+      alertBox.classList.add('hidden');
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "LOGIN",
+            username: u,
+            password: p
+          })
+        });
+
+        const res = await response.json();
+
+        btn.disabled = false;
+        btn.innerHTML = '<span>Masuk Aplikasi</span><i class="fa-solid fa-arrow-right"></i>';
+
+        if (res.success) {
+          currentUser = res.user;
+          sessionToken = res.token;
+          applyRoleUI();
+          showApp();
+        } else {
+          document.getElementById('login-alert-text').innerText = res.message;
+          alertBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Masuk Aplikasi</span><i class="fa-solid fa-arrow-right"></i>';
+        document.getElementById('login-alert-text').innerText = "Gagal terhubung server: " + (err.message || err);
+        alertBox.classList.remove('hidden');
+      }
+    }
+    function showApp() {
+
+      document.getElementById('login-view').classList.add('hidden');
+
+      document.getElementById('app-view').classList.remove('hidden');
+
+      
+
+      document.getElementById('user-display-name').innerText = currentUser.nama;
+
+      document.getElementById('user-role').innerText = currentUser.role;
+
+      document.getElementById('user-avatar').innerText = currentUser.nama.substring(0, 2).toUpperCase();
+
+
+
+      refreshDashboardData();
+
+      loadAssetTable();
+
+      const pendingAssetCode = getRequestedAssetCode();
+
+      if (pendingAssetCode) { switchTab('inspection'); document.getElementById('inspection-code').value = pendingAssetCode; lookupInspectionAsset(); }
+
+      else switchTab('dashboard');
+
+    }
+
+
+
+    function confirmSwitchUser() {
+
+      const setuju = confirm("Apakah Anda ingin ganti/pindah ke akun lain?");
+
+      if (setuju) {
+
+        handleLogout();
+
+      }
+
+    }
+
+
+
+    function confirmLogout() {
+
+      const setuju = confirm("Apakah Anda yakin ingin keluar dari aplikasi?");
+
+      if (setuju) {
+
+        handleLogout();
+
+      }
+
+    }
+
+
+
+    function handleLogout() {
+
+      if (sessionToken && typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run.logoutUser(sessionToken);
+
+      }
+
+      currentUser = null;
+
+      sessionToken = null;
+
+      document.getElementById('app-view').classList.add('hidden');
+
+      document.getElementById('login-view').classList.remove('hidden');
+
+      document.getElementById('login-username').value = '';
+
+      document.getElementById('login-password').value = '';
+
+    }
+
+
+
+    /* --- NAVIGATION / TAB SWITCHER --- */
+
+    function switchTab(tabName) {
+
+      const tabs = ['dashboard', 'assets', 'inspection', 'serah-terima', 'activity'];
+
+      tabs.forEach(t => {
+
+        const view = document.getElementById(`view-${t}`);
+
+        const nav = document.getElementById(`nav-${t}`);
+
+        if (t === tabName) {
+
+          view.classList.remove('hidden');
+
+          nav.classList.add('bg-slate-800', 'text-white', 'shadow-inner');
+
+          nav.classList.remove('hover:bg-slate-800/80');
+
+        } else {
+
+          view.classList.add('hidden');
+
+          nav.classList.remove('bg-slate-800', 'text-white', 'shadow-inner');
+
+          nav.classList.add('hover:bg-slate-800/80');
+
         }
 
-        // Fungsi menampilkan data ke dalam tabel HTML
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+      });
 
-            // Asumsi baris 0 adalah Header di Google Sheet, kita mulai dari baris ke-1
-            for (let i = 1; i < data.length; i++) {
-                const row = data[i];
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-3">${i}</td>
-                    <td class="p-3 font-medium text-gray-900">${row[0] || '-'}</td>
-                    <td class="p-3">${row[1] || '-'}</td>
-                    <td class="p-3"><span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${row[2] || 'Aktif'}</span></td>
+
+
+      if (tabName === 'dashboard') {
+
+        document.getElementById('page-title').innerText = 'Dashboard Aset';
+
+        document.getElementById('page-subtitle').innerText = 'Ringkasan statistik data aset terbaru';
+
+        refreshDashboardData();
+
+      } else if (tabName === 'assets') {
+
+        document.getElementById('page-title').innerText = 'Manajemen Data Aset';
+
+        document.getElementById('page-subtitle').innerText = 'Daftar seluruh inventaris dan barang milik perusahaan';
+
+        loadAssetTable();
+
+      } else if (tabName === 'serah-terima') {
+
+        document.getElementById('page-title').innerText = 'Form Serah Terima (Penunjukkan Asset)';
+
+        document.getElementById('page-subtitle').innerText = 'Format resmi penunjukkan tanggung jawab aset karyawan';
+
+        populateAssignmentDropdown();
+
+      } else if (tabName === 'inspection') {
+
+        document.getElementById('page-title').innerText = 'Scan QR & Pemeriksaan Fisik';
+
+        document.getElementById('page-subtitle').innerText = 'Pemeriksaan aset melalui ponsel dengan pencatatan Google Sheets';
+
+        stopAssetScanner();
+
+        loadInspectionEmployees();
+
+      } else if (tabName === 'activity') {
+
+        document.getElementById('page-title').innerText = 'Log Aktivitas';
+
+        document.getElementById('page-subtitle').innerText = 'Catatan login & histori operasional.';
+
+        loadActivityLog();
+
+      }
+
+    }
+
+
+
+    /* --- DASHBOARD DATA --- */
+
+    function refreshDashboardData() {
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            if (res.success) {
+
+              document.getElementById('stat-total-aset').innerText = res.totalAset;
+
+              document.getElementById('stat-kondisi-baik').innerText = res.kondisiBaik;
+
+              document.getElementById('stat-kondisi-rusak').innerText = res.kondisiRusak;
+
+              document.getElementById('stat-last-update').innerText = res.lastUpdate;
+
+
+
+              const katContainer = document.getElementById('kategori-container');
+
+              katContainer.innerHTML = '';
+
+              Object.keys(res.kategoriBreakdown).forEach(k => {
+
+                katContainer.innerHTML += `
+
+                  <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
+
+                    <p class="text-[10px] uppercase font-bold text-slate-400">${escapeHTML(k)}</p>
+
+                    <p class="text-xl font-extrabold text-white mt-1">${res.kategoriBreakdown[k]}</p>
+
+                  </div>
+
                 `;
-                tbody.appendChild(tr);
+
+              });
+
             }
+
+          })
+
+          .getDashboardData(sessionToken);
+
+      } else {
+
+        document.getElementById('stat-total-aset').innerText = rawAssetsList.length || 2;
+
+        document.getElementById('stat-kondisi-baik').innerText = 2;
+
+        document.getElementById('stat-kondisi-rusak').innerText = 0;
+
+        document.getElementById('stat-last-update').innerText = new Date().toLocaleTimeString();
+
+        document.getElementById('kategori-container').innerHTML = `
+
+          <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
+
+            <p class="text-[10px] uppercase font-bold text-slate-400">HANDY TALKY</p>
+
+            <p class="text-xl font-extrabold text-white mt-1">1</p>
+
+          </div>
+
+          <div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl text-center">
+
+            <p class="text-[10px] uppercase font-bold text-slate-400">LAPTOP</p>
+
+            <p class="text-xl font-extrabold text-white mt-1">1</p>
+
+          </div>
+
+        `;
+
+      }
+
+    }
+
+
+
+    /* --- ASSET CRUD DATA --- */
+
+    function loadAssetTable() {
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            if (res.success) {
+
+              rawAssetsList = res.data;
+
+              renderAssetTable(rawAssetsList);
+
+              populateKategoriFilter(rawAssetsList);
+
+            }
+
+          })
+
+          .getAssets(sessionToken);
+
+      } else {
+
+        if (rawAssetsList.length === 0) {
+
+          rawAssetsList = [
+
+            {
+
+              'Kode Aset': '225',
+
+              'Nama Aset': 'Handy Talky Portable',
+
+              'Kategori': 'HANDY TALKY',
+
+              'Tipe Aset': 'HARDWARE',
+
+              'Merk': 'MOTOROLA',
+
+              'Model': 'Motorola Solutions Portable (AZH03KEK8AA9) TANAPA PMUD2437AAA R03.05 CP1660 VHF',
+
+              'Serial Number': '1335UB1432',
+
+              'ID Karyawan (NRP)': 'CB.1106.0304',
+
+              'PIC Barang': 'Sukardiyono',
+
+              'Jabatan': 'Foreman Plant',
+
+              'Unit Bisnis': 'PT. Chandra Batuah Mustika Lestari',
+
+              'Divisi': 'PLANT',
+
+              'Kondisi': 'Baik',
+
+              'Lokasi': 'CBML Site Adaro',
+
+              'Tahun Diterima': '2026',
+
+              'Tanggal Penyerahan': '2026-07-01'
+
+            }
+
+          ];
+
         }
 
-        // Jalankan pemanggilan data otomatis saat halaman selesai dimuat
-        document.addEventListener('DOMContentLoaded', fetchData);
-    </script>
+        renderAssetTable(rawAssetsList);
+
+        populateKategoriFilter(rawAssetsList);
+
+      }
+
+    }
+
+
+
+    function renderAssetTable(data) {
+
+      const tbody = document.getElementById('asset-table-body');
+
+      const emptyBox = document.getElementById('asset-table-empty');
+
+      tbody.innerHTML = '';
+
+
+
+      if (data.length === 0) {
+
+        emptyBox.classList.remove('hidden');
+
+        return;
+
+      }
+
+      emptyBox.classList.add('hidden');
+
+
+
+      data.forEach((item, index) => {
+
+        const isBaik = String(item['Kondisi']).toLowerCase().includes('baik');
+
+        const badgeClass = isBaik ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+
+
+
+        tbody.innerHTML += `
+
+          <tr class="hover:bg-slate-800/40 transition border-b border-slate-800/60">
+
+            <td class="p-3 text-center font-bold text-slate-500">${index + 1}</td>
+
+            <td class="p-3 font-mono font-bold text-cyan-400">${escapeHTML(item['Kode Aset'])}</td>
+
+            <td class="p-3 font-semibold text-slate-200">${escapeHTML(item['Nama Aset'])}</td>
+
+            <td class="p-3 text-slate-400">${escapeHTML(item['Merk'] || '-')} / <span class="text-[11px] text-slate-500">${escapeHTML(item['Kategori'])}</span></td>
+
+            <td class="p-3 font-mono text-slate-400">${escapeHTML(item['Serial Number'] || '-')}</td>
+
+            <td class="p-3">
+
+              <p class="font-bold text-slate-300">${escapeHTML(item['PIC Barang'] || '-')}</p>
+
+              <p class="text-[10px] font-mono text-slate-500">${escapeHTML(item['ID Karyawan (NRP)'] || '-')}</p>
+
+            </td>
+
+            <td class="p-3">
+
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${badgeClass}">${escapeHTML(item['Kondisi'])}</span>
+
+            </td>
+
+            <td class="p-3 text-slate-400">${escapeHTML(item['Lokasi'] || '-')}</td>
+
+            <td class="p-3 text-slate-400">${formatDateIndo(item['Tanggal Penyerahan'])}</td>
+
+            <td class="p-3 text-center">
+
+              <div class="inline-flex items-center gap-1">
+
+                <button data-admin-only onclick="editAsset('${escapeHTML(item['Kode Aset'])}')" title="Edit Data Aset" class="p-1.5 text-blue-400 hover:bg-blue-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-pen-to-square"></i>
+
+                </button>
+
+                <button data-admin-only onclick="openEditKodeModal('${escapeHTML(item['Kode Aset'])}')" title="Edit Kode Aset" class="p-1.5 text-amber-400 hover:bg-amber-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-hashtag"></i>
+
+                </button>
+
+                <button data-admin-only onclick="openTransferPicModal('${escapeHTML(item['Kode Aset'])}')" title="Pindah PIC" class="p-1.5 text-violet-400 hover:bg-violet-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-people-arrows-left-right"></i>
+
+                </button>
+
+                <button onclick="openPicHistory('${escapeHTML(item['Kode Aset'])}')" title="Histori PIC" class="p-1.5 text-sky-400 hover:bg-sky-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+
+                </button>
+
+                <button onclick="printSingleQrLabel('${escapeHTML(item['Kode Aset'])}')" title="Cetak QR / Label Aset" class="p-1.5 text-violet-400 hover:bg-violet-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-qrcode"></i>
+
+                </button>
+
+                <button onclick="printSerahTerimaFor('${escapeHTML(item['Kode Aset'])}')" title="Cetak Surat Serah Terima" class="p-1.5 text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-file-contract"></i>
+
+                </button>
+
+                <button data-admin-only onclick="confirmDeleteAsset('${escapeHTML(item['Kode Aset'])}')" title="Hapus" class="p-1.5 text-red-400 hover:bg-red-500/10 rounded-lg transition">
+
+                  <i class="fa-solid fa-trash-can"></i>
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      });
+
+      applyRoleUI();
+
+    }
+
+
+
+    function populateKategoriFilter(data) {
+
+      const select = document.getElementById('filter-kategori');
+
+      const kats = [...new Set(data.map(i => i['Kategori']))].filter(Boolean);
+
+      select.innerHTML = '<option value="">Semua Kategori</option>';
+
+      kats.forEach(k => {
+
+        select.innerHTML += `<option value="${escapeHTML(k)}">${escapeHTML(k)}</option>`;
+
+      });
+
+    }
+
+
+
+    function filterAssets() {
+
+      const query = document.getElementById('search-asset').value.toLowerCase();
+
+      const kat = document.getElementById('filter-kategori').value;
+
+
+
+      const filtered = rawAssetsList.filter(item => {
+
+        const matchQuery = (
+
+          String(item['Kode Aset']).toLowerCase().includes(query) ||
+
+          String(item['Nama Aset']).toLowerCase().includes(query) ||
+
+          String(item['PIC Barang']).toLowerCase().includes(query) ||
+
+          String(item['Serial Number']).toLowerCase().includes(query)
+
+        );
+
+        const matchKat = !kat || item['Kategori'] === kat;
+
+        return matchQuery && matchKat;
+
+      });
+
+
+
+      renderAssetTable(filtered);
+
+    }
+
+
+
+    /* --- ADD / EDIT ASSET MODAL --- */
+
+    function getLocalNextAssetCode() {
+
+      const codes = rawAssetsList
+
+        .map(item => parseInt(String(item['Kode Aset'] || '').trim(), 10))
+
+        .filter(code => Number.isFinite(code));
+
+
+
+      return String(codes.length ? Math.max(...codes) + 1 : 1);
+
+    }
+
+
+
+    function openAddAssetModal() {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      const modal = document.getElementById('modal-asset');
+
+      modal.dataset.editMode = 'false';
+
+
+
+      document.getElementById('modal-title').innerText = 'Form Input Aset Baru';
+
+      document.getElementById('form-kode').value = getLocalNextAssetCode();
+
+      document.getElementById('form-kode-help').innerHTML =
+
+        'Kode aset dibuat <b>otomatis</b> sesuai urutan dan akan dikonfirmasi ulang oleh server saat disimpan.';
+
+      document.getElementById('form-nama').value = '';
+
+      document.getElementById('form-kategori').value = 'HANDY TALKY';
+
+      document.getElementById('form-tipe').value = 'HARDWARE';
+
+      document.getElementById('form-merk').value = '';
+
+      document.getElementById('form-model').value = '';
+
+      document.getElementById('form-sn').value = '';
+
+      document.getElementById('form-kondisi').value = 'Baik';
+
+      document.getElementById('form-nrp').value = '';
+
+      document.getElementById('form-pic').value = '';
+
+      document.getElementById('form-jabatan').value = '';
+
+      document.getElementById('form-divisi').value = '';
+
+      document.getElementById('form-lokasi').value = 'CBML Site Adaro';
+
+      document.getElementById('form-tgl-ho').value = new Date().toISOString().slice(0,10);
+
+      document.getElementById('form-tgl-serah').value = new Date().toISOString().split('T')[0];
+
+      document.getElementById('form-pemberi-1').value = 'Faisal (Foreman HC)';
+
+      document.getElementById('form-pemberi-2').value = 'Junaidi (GA Officer)';
+
+      document.getElementById('form-penerima-2').value = 'Tomineus (Penanggung Jawab Operasional)';
+
+
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            const isEditNow = document.getElementById('modal-asset').dataset.editMode === 'true';
+
+            if (res.success && !isEditNow) {
+
+              document.getElementById('form-kode').value = res.code;
+
+            }
+
+          })
+
+          .getNextAssetCode(sessionToken);
+
+      }
+
+
+
+      modal.classList.remove('hidden');
+
+    }
+
+
+
+    function editAsset(kode) {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      const item = rawAssetsList.find(a => String(a['Kode Aset']) === String(kode));
+
+      if (!item) return;
+
+
+
+      const modal = document.getElementById('modal-asset');
+
+      modal.dataset.editMode = 'true';
+
+
+
+      document.getElementById('modal-title').innerText = 'Edit Data Aset #' + kode;
+
+      document.getElementById('form-kode').value = item['Kode Aset'];
+
+      document.getElementById('form-kode-help').innerHTML =
+
+        'Kode saat ini <b>' + item['Kode Aset'] + '</b>. Untuk mengganti kode, gunakan tombol <b>#</b> / <b>Edit Kode Aset</b> pada tabel.';
+
+      document.getElementById('form-nama').value = item['Nama Aset'];
+
+      document.getElementById('form-kategori').value = item['Kategori'];
+
+      document.getElementById('form-tipe').value = item['Tipe Asset'] || 'HARDWARE';
+
+      document.getElementById('form-merk').value = item['Merk'] || '';
+
+      document.getElementById('form-model').value = item['Model'] || '';
+
+      document.getElementById('form-sn').value = item['Serial Number'] || '';
+
+      document.getElementById('form-kondisi').value = item['Kondisi'] || 'Baik';
+
+      document.getElementById('form-nrp').value = item['ID Karyawan (NRP)'] || '';
+
+      document.getElementById('form-pic').value = item['PIC Barang'] || '';
+
+      document.getElementById('form-jabatan').value = item['Jabatan'] || '';
+
+      document.getElementById('form-divisi').value = item['Divisi'] || '';
+
+      document.getElementById('form-lokasi').value = item['Lokasi'] || '';
+
+      document.getElementById('form-tgl-ho').value = item['Tanggal Diterima HO'] || (String(item['Tahun Diterima']||'').match(/^\d{4}$/) ? item['Tahun Diterima']+'-01-01' : '');
+
+      document.getElementById('form-tgl-serah').value = item['Tanggal Penyerahan'] || '';
+
+      document.getElementById('form-pemberi-1').value = item['Yang Memberikan 1'] || 'Faisal (Foreman HC)';
+
+      document.getElementById('form-pemberi-2').value = item['Yang Memberikan 2'] || 'Junaidi (GA Officer)';
+
+      document.getElementById('form-penerima-2').value = item['Yang Menerima 2'] || 'Tomineus (Penanggung Jawab Operasional)';
+
+
+
+      modal.classList.remove('hidden');
+
+    }
+
+
+
+    function closeAssetModal() {
+
+      const modal = document.getElementById('modal-asset');
+
+      modal.classList.add('hidden');
+
+      modal.dataset.editMode = 'false';
+
+    }
+
+
+
+    function openEditKodeModal(kode) {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      document.getElementById('edit-old-kode').value = kode;
+
+      document.getElementById('edit-new-kode').value = kode;
+
+      document.getElementById('modal-edit-kode').classList.remove('hidden');
+
+
+
+      setTimeout(() => {
+
+        document.getElementById('edit-new-kode').focus();
+
+        document.getElementById('edit-new-kode').select();
+
+      }, 50);
+
+    }
+
+
+
+    function closeEditKodeModal() {
+
+      document.getElementById('modal-edit-kode').classList.add('hidden');
+
+      document.getElementById('edit-old-kode').value = '';
+
+      document.getElementById('edit-new-kode').value = '';
+
+    }
+
+
+
+    function handleUpdateAssetCode(e) {
+
+      e.preventDefault();
+
+
+
+      const oldCode = document.getElementById('edit-old-kode').value.trim();
+
+      const newCode = document.getElementById('edit-new-kode').value.trim();
+
+
+
+      if (!/^\d+$/.test(newCode)) {
+
+        alert('Kode Aset baru harus berupa angka.');
+
+        return;
+
+      }
+
+
+
+      if (oldCode === newCode) {
+
+        alert('Kode Aset baru sama dengan kode lama.');
+
+        return;
+
+      }
+
+
+
+      const btn = document.getElementById('btn-update-kode');
+
+      btn.disabled = true;
+
+      btn.innerText = 'Menyimpan...';
+
+
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            btn.disabled = false;
+
+            btn.innerText = 'Simpan Kode';
+
+
+
+            if (res.success) {
+
+              closeEditKodeModal();
+
+              loadAssetTable();
+
+              refreshDashboardData();
+
+              alert(res.message);
+
+            } else {
+
+              alert('Gagal mengubah kode: ' + res.message);
+
+            }
+
+          })
+
+          .withFailureHandler(err => {
+
+            btn.disabled = false;
+
+            btn.innerText = 'Simpan Kode';
+
+            alert('Gagal terhubung server: ' + err.message);
+
+          })
+
+          .updateAssetCode(sessionToken, oldCode, newCode);
+
+      } else {
+
+        const duplicate = rawAssetsList.some(item =>
+
+          String(item['Kode Aset']) === newCode && String(item['Kode Aset']) !== oldCode
+
+        );
+
+
+
+        if (duplicate) {
+
+          btn.disabled = false;
+
+          btn.innerText = 'Simpan Kode';
+
+          alert('Kode Aset ' + newCode + ' sudah digunakan.');
+
+          return;
+
+        }
+
+
+
+        const item = rawAssetsList.find(item => String(item['Kode Aset']) === oldCode);
+
+        if (!item) {
+
+          btn.disabled = false;
+
+          btn.innerText = 'Simpan Kode';
+
+          alert('Kode Aset lama tidak ditemukan.');
+
+          return;
+
+        }
+
+
+
+        item['Kode Aset'] = newCode;
+
+        closeEditKodeModal();
+
+        renderAssetTable(rawAssetsList);
+
+        populateKategoriFilter(rawAssetsList);
+
+        btn.disabled = false;
+
+        btn.innerText = 'Simpan Kode';
+
+        alert('Kode Aset berhasil diubah dari ' + oldCode + ' menjadi ' + newCode + '.');
+
+      }
+
+    }
+
+
+
+    function handleSaveAsset(e) {
+
+      e.preventDefault();
+
+
+
+      const isEdit = document.getElementById('modal-asset').dataset.editMode === 'true';
+
+
+
+      const payload = {
+
+        '_isEdit': isEdit,
+
+        'Kode Aset': document.getElementById('form-kode').value,
+
+        'Nama Aset': document.getElementById('form-nama').value,
+
+        'Kategori': document.getElementById('form-kategori').value.toUpperCase(),
+
+        'Tipe Aset': document.getElementById('form-tipe').value.toUpperCase(),
+
+        'Merk': document.getElementById('form-merk').value.toUpperCase(),
+
+        'Model': document.getElementById('form-model').value,
+
+        'Serial Number': document.getElementById('form-sn').value,
+
+        'Kondisi': document.getElementById('form-kondisi').value,
+
+        'ID Karyawan (NRP)': document.getElementById('form-nrp').value,
+
+        'PIC Barang': document.getElementById('form-pic').value,
+
+        'Jabatan': document.getElementById('form-jabatan').value,
+
+        'Unit Bisnis': 'PT. Chandra Batuah Mustika Lestari',
+
+        'Divisi': document.getElementById('form-divisi').value.toUpperCase(),
+
+        'Lokasi': document.getElementById('form-lokasi').value,
+
+        'Tanggal Diterima HO': document.getElementById('form-tgl-ho').value,
+
+        'Tanggal Penyerahan': document.getElementById('form-tgl-serah').value,
+
+        'Yang Memberikan 1': document.getElementById('form-pemberi-1').value,
+
+        'Yang Memberikan 2': document.getElementById('form-pemberi-2').value,
+
+        'Yang Menerima 2': document.getElementById('form-penerima-2').value
+
+      };
+
+
+
+      const btn = document.getElementById('btn-save-asset');
+
+      btn.disabled = true;
+
+      btn.innerText = 'Menyimpan...';
+
+
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            btn.disabled = false;
+
+            btn.innerText = 'Simpan Data';
+
+
+
+            if (res.success) {
+
+              closeAssetModal();
+
+              loadAssetTable();
+
+              refreshDashboardData();
+
+
+
+              if (!isEdit && res.code) {
+
+                alert('Aset berhasil disimpan. Kode Aset otomatis: ' + res.code);
+
+              }
+
+            } else {
+
+              alert('Gagal menyimpan: ' + res.message);
+
+            }
+
+          })
+
+          .withFailureHandler(err => {
+
+            btn.disabled = false;
+
+            btn.innerText = 'Simpan Data';
+
+            alert('Gagal terhubung server: ' + err.message);
+
+          })
+
+          .saveAsset(sessionToken, payload);
+
+      } else {
+
+        setTimeout(() => {
+
+          btn.disabled = false;
+
+          btn.innerText = 'Simpan Data';
+
+
+
+          if (isEdit) {
+
+            const idx = rawAssetsList.findIndex(a => String(a['Kode Aset']) === String(payload['Kode Aset']));
+
+            if (idx === -1) {
+
+              alert('Kode Aset tidak ditemukan.');
+
+              return;
+
+            }
+
+            rawAssetsList[idx] = { ...rawAssetsList[idx], ...payload };
+
+          } else {
+
+            const newCode = getLocalNextAssetCode();
+
+            payload['Kode Aset'] = newCode;
+
+            rawAssetsList.push(payload);
+
+          }
+
+
+
+          closeAssetModal();
+
+          renderAssetTable(rawAssetsList);
+
+          populateKategoriFilter(rawAssetsList);
+
+
+
+          if (!isEdit) {
+
+            alert('Aset berhasil disimpan. Kode Aset otomatis: ' + payload['Kode Aset']);
+
+          }
+
+        }, 500);
+
+      }
+
+    }
+
+
+
+    function confirmDeleteAsset(kode) {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      if (!confirm(`Apakah Anda yakin ingin menghapus data aset Kode: ${kode}?`)) return;
+
+
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            if (res.success) {
+
+              loadAssetTable();
+
+              refreshDashboardData();
+
+            } else {
+
+              alert('Gagal hapus: ' + res.message);
+
+            }
+
+          })
+
+          .deleteAsset(sessionToken, kode);
+
+      } else {
+
+        rawAssetsList = rawAssetsList.filter(a => a['Kode Aset'] !== kode);
+
+        renderAssetTable(rawAssetsList);
+
+      }
+
+    }
+
+
+
+    /* --- HISTORI DAN PERPINDAHAN PIC --- */
+
+    function openTransferPicModal(kode) {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      const a = rawAssetsList.find(x => String(x['Kode Aset']) === String(kode)); if (!a) return;
+
+      document.getElementById('transfer-kode').value = a['Kode Aset'];
+
+      document.getElementById('transfer-current-pic').innerText = `Aset ${a['Kode Aset']} — ${a['Nama Aset']} | PIC saat ini: ${a['PIC Barang'] || '-'} (${a['ID Karyawan (NRP)'] || 'tanpa NRP'})`;
+
+      document.getElementById('transfer-tanggal').value = new Date().toISOString().slice(0,10);
+
+      ['transfer-pic','transfer-nrp','transfer-jabatan','transfer-divisi','transfer-catatan'].forEach(id => document.getElementById(id).value = '');
+
+      document.getElementById('transfer-lokasi').value = a['Lokasi'] || '';
+
+      document.getElementById('transfer-alasan').value = '';
+
+      document.getElementById('modal-transfer-pic').classList.remove('hidden');
+
+    }
+
+    function closeTransferPicModal(){document.getElementById('modal-transfer-pic').classList.add('hidden');}
+
+    function submitTransferPic(e){
+
+      e.preventDefault(); if(!currentUser||currentUser.role!=='Admin'){alert('Akses hanya untuk Admin.');return;}
+
+      const btn=document.getElementById('btn-transfer-pic');btn.disabled=true;btn.innerText='Menyimpan...';
+
+      const payload={kodeAset:document.getElementById('transfer-kode').value,tanggal:document.getElementById('transfer-tanggal').value,picBaru:document.getElementById('transfer-pic').value.trim(),nrpBaru:document.getElementById('transfer-nrp').value.trim(),jabatanBaru:document.getElementById('transfer-jabatan').value.trim(),divisiBaru:document.getElementById('transfer-divisi').value.trim(),lokasiBaru:document.getElementById('transfer-lokasi').value.trim(),alasan:document.getElementById('transfer-alasan').value,catatan:document.getElementById('transfer-catatan').value.trim()};
+
+      google.script.run.withSuccessHandler(res=>{btn.disabled=false;btn.innerText='Simpan Perpindahan';if(res&&res.success){closeTransferPicModal();loadAssetTable();refreshDashboardData();alert(res.message);}else alert((res&&res.message)||'Gagal menyimpan perpindahan PIC.');}).withFailureHandler(err=>{btn.disabled=false;btn.innerText='Simpan Perpindahan';alert('Gagal menyimpan perpindahan PIC: '+(err&&err.message?err.message:err));}).transferAssetPIC(sessionToken,payload);
+
+    }
+
+    function openPicHistory(kode){
+
+      const a=rawAssetsList.find(x=>String(x['Kode Aset'])===String(kode));if(!a)return;
+
+      document.getElementById('history-asset-title').innerText=`Kode ${a['Kode Aset']} — ${a['Nama Aset']} | PIC saat ini: ${a['PIC Barang']||'-'}`;
+
+      document.getElementById('pic-history-content').innerHTML='<p class="p-4 text-center">Memuat histori...</p>';document.getElementById('modal-pic-history').classList.remove('hidden');
+
+      google.script.run.withSuccessHandler(res=>{const host=document.getElementById('pic-history-content');if(!res||!res.success){host.innerHTML='<p class="p-4 text-red-400">Histori tidak dapat dimuat.</p>';return;}const rows=res.data||[];if(!rows.length){host.innerHTML='<div class="p-6 text-center rounded-xl bg-slate-800/60"><i class="fa-solid fa-clock-rotate-left text-2xl text-slate-500 mb-2"></i><p class="font-semibold text-slate-300">Belum ada histori perpindahan PIC</p><p class="mt-1 text-slate-400">Histori akan tercatat otomatis setiap kali Admin menggunakan fitur Pindah PIC.</p></div>';return;}host.innerHTML='<div class="overflow-x-auto"><table class="min-w-full border-collapse"><thead><tr class="bg-slate-800 text-left"><th class="p-3">Tanggal</th><th class="p-3">PIC Sebelumnya</th><th class="p-3">PIC Baru</th><th class="p-3">Alasan</th><th class="p-3">Catatan</th><th class="p-3">Diproses Oleh</th></tr></thead><tbody>'+rows.map(r=>`<tr class="border-b border-slate-800 align-top"><td class="p-3 whitespace-nowrap">${escapeHTML(formatDateIndo(r['Tanggal Perpindahan']))}</td><td class="p-3">${escapeHTML(r['PIC Sebelumnya']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Sebelumnya']||'')}</div></td><td class="p-3 font-semibold text-white">${escapeHTML(r['PIC Baru']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Baru']||'')}</div></td><td class="p-3">${escapeHTML(r['Alasan Perpindahan']||'-')}</td><td class="p-3 whitespace-pre-wrap">${escapeHTML(r['Catatan']||'-')}</td><td class="p-3">${escapeHTML(r['Diproses Oleh']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['Waktu Pencatatan']||'')}</div></td></tr>`).join('')+'</tbody></table></div>';}).withFailureHandler(err=>{document.getElementById('pic-history-content').innerHTML='<p class="p-4 text-red-400">Gagal memuat histori: '+escapeHTML(err&&err.message?err.message:err)+'</p>';}).getPicHistory(sessionToken,kode);
+
+    }
+
+    function closePicHistory(){document.getElementById('modal-pic-history').classList.add('hidden');}
+
+
+
+    /* --- ASSIGNMENT LETTER LOGIC --- */
+
+    function populateAssignmentDropdown() {
+
+      const select = document.getElementById('select-asset-assignment');
+
+      select.innerHTML = '';
+
+      if (rawAssetsList.length === 0) {
+
+        select.innerHTML = '<option value="">Belum ada data aset</option>';
+
+        return;
+
+      }
+
+
+
+      rawAssetsList.forEach(a => {
+
+        select.innerHTML += `<option value="${escapeHTML(a['Kode Aset'])}">${escapeHTML(a['Kode Aset'])} - ${escapeHTML(a['Nama Aset'])} (${escapeHTML(a['PIC Barang'] || 'No PIC')})</option>`;
+
+      });
+
+
+
+      loadAssignmentForm();
+
+    }
+
+
+
+    function printSerahTerimaFor(kode) {
+
+      switchTab('serah-terima');
+
+      document.getElementById('select-asset-assignment').value = kode;
+
+      loadAssignmentForm();
+
+    }
+
+
+
+    function loadAssignmentForm() {
+
+      const kode = document.getElementById('select-asset-assignment').value;
+
+      const asset = rawAssetsList.find(a => String(a['Kode Aset']) === String(kode));
+
+      if (!asset) return;
+
+
+
+      const kat = asset['Kategori'] || 'HANDY TALKY';
+
+      document.getElementById('doc-ref-kode').innerText = `CBML/GA/${kat}/${asset['Kode Aset']}`;
+
+      
+
+      document.getElementById('doc-nrp').innerText = asset['ID Karyawan (NRP)'] || 'CB.1106.0304';
+
+      document.getElementById('doc-nama').innerText = asset['PIC Barang'] || 'Sukardiyono';
+
+      document.getElementById('doc-jabatan').innerText = asset['Jabatan'] || 'Foreman Plant';
+
+      document.getElementById('doc-unit').innerText = asset['Unit Bisnis'] || 'PT. Chandra Batuah Mustika Lestari';
+
+      document.getElementById('doc-divisi').innerText = asset['Divisi'] || 'PLANT';
+
+      document.getElementById('doc-lokasi').innerText = asset['Lokasi'] || 'CBML Site Adaro';
+
+
+
+      document.getElementById('doc-kode-asset').innerText = asset['Kode Aset'];
+
+      document.getElementById('doc-tipe-asset').innerText = asset['Tipe Asset'] || 'HARDWARE';
+
+      document.getElementById('doc-kategori-asset').innerText = kat;
+
+      document.getElementById('doc-merk').innerText = asset['Merk'] || 'MOTOROLA';
+
+      document.getElementById('doc-model').innerText = asset['Model'] || asset['Nama Aset'];
+
+      document.getElementById('doc-sn').innerText = asset['Serial Number'] || '-';
+
+      
+
+      document.getElementById('doc-umur').innerText = calculateAssetAge(asset['Tanggal Diterima HO'] || (String(asset['Tahun Diterima']||'').match(/^\d{4}$/) ? asset['Tahun Diterima']+'-01-01' : ''));
+
+      document.getElementById('doc-tgl-ho').innerText = formatDateIndo(asset['Tanggal Diterima HO'] || (String(asset['Tahun Diterima']||'').match(/^\d{4}$/) ? asset['Tahun Diterima']+'-01-01' : ''));
+
+      document.getElementById('doc-tgl-serah').innerText = formatDateIndo(asset['Tanggal Penyerahan']);
+
+
+
+      document.getElementById('doc-pemberi-1').innerText = asset['Yang Memberikan 1'] ? asset['Yang Memberikan 1'].split('(')[0] : 'Faisal';
+
+      document.getElementById('doc-pemberi-1-jab').innerText = 'Foreman HC';
+
+
+
+      document.getElementById('doc-pemberi-2').innerText = asset['Yang Memberikan 2'] ? asset['Yang Memberikan 2'].split('(')[0] : 'Junaidi';
+
+      document.getElementById('doc-pemberi-2-jab').innerText = 'GA Officer';
+
+
+
+      document.getElementById('doc-penerima-1').innerText = asset['PIC Barang'] || 'Sukardiyono';
+
+      document.getElementById('doc-penerima-1-jab').innerText = asset['Jabatan'] || 'Foreman Plant';
+
+
+
+      document.getElementById('doc-penerima-2').innerText = asset['Yang Menerima 2'] ? asset['Yang Menerima 2'].split('(')[0] : 'Tomineus';
+
+      document.getElementById('doc-penerima-2-jab').innerText = 'Penanggung Jawab Operasional';
+
+    }
+
+
+
+    /* --- QR CODE, EXPORT, LOG AKTIVITAS --- */
+
+    function getVisibleAssets() {
+
+      const query = (document.getElementById('search-asset')?.value || '').toLowerCase();
+
+      const kat = document.getElementById('filter-kategori')?.value || '';
+
+      return rawAssetsList.filter(item => {
+
+        const haystack = [item['Kode Aset'], item['Nama Aset'], item['PIC Barang'], item['Serial Number'], item['Lokasi']].join(' ').toLowerCase();
+
+        return haystack.includes(query) && (!kat || item['Kategori'] === kat);
+
+      });
+
+    }
+
+
+
+    function makeAsetId(asset) {
+
+      const nama = String(asset['Nama Aset'] || 'ASET').trim()
+
+        .toUpperCase()
+
+        .replace(/[^A-Z0-9]+/g, '_')
+
+        .replace(/^_+|_+$/g, '') || 'ASET';
+
+      const rawDate = asset['Tanggal Penyerahan'] || asset['Tanggal Serah'] || '';
+
+      let date = null;
+
+      if (rawDate instanceof Date && !isNaN(rawDate.getTime())) {
+
+        date = rawDate;
+
+      } else {
+
+        const value = String(rawDate).trim();
+
+        let m = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+
+        if (m) date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+
+        if (!date) {
+
+          m = value.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+
+          if (m) date = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+
+        }
+
+        if (!date && value) {
+
+          const parsed = new Date(value);
+
+          if (!isNaN(parsed.getTime())) date = parsed;
+
+        }
+
+      }
+
+      const monthYear = date && !isNaN(date.getTime())
+
+        ? String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getFullYear()).slice(-2)
+
+        : 'MM-YY';
+
+      const kode = String(asset['Kode Aset'] == null ? '' : asset['Kode Aset']).trim() || '-';
+
+      return 'CBML/GA/' + nama + '/' + monthYear + '/' + kode;
+
+    }
+
+
+
+    function qrImageUrl(asset) {
+
+      const base = APP_URL || (window.location.origin + window.location.pathname);
+
+      const payload = base + '?asset=' + encodeURIComponent(String(asset['Kode Aset'] || ''));
+
+      return 'https://quickchart.io/qr?size=220&margin=1&text=' + encodeURIComponent(payload);
+
+    }
+
+
+
+    function openQrLabelOptions() {
+      const modal = document.getElementById('modal-qr-label');
+      const count = rawAssetsList.length;
+      document.getElementById('qr-total-assets-sticker').textContent = count;
+      document.getElementById('qr-total-assets-std').textContent = count;
+      document.getElementById('qr-person-search').value = '';
+      document.getElementById('qr-person-results').innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Ketik nama atau NRP untuk mencari karyawan.</p>';
+      modal.classList.remove('hidden');
+      setTimeout(() => document.getElementById('qr-person-search').focus(), 50);
+    }
+
+    function closeQrLabelOptions() { document.getElementById('modal-qr-label').classList.add('hidden'); }
+
+    function printAllQrLabels(type = 'sticker') {
+      const data = [...rawAssetsList];
+      if (!data.length) { alert('Tidak ada aset untuk dicetak.'); return; }
+      closeQrLabelOptions();
+      if (type === 'sticker') {
+        openStickerLabelPrintWindow(data);
+      } else {
+        openQrPrintWindow(data);
+      }
+    }
+
+    function searchQrLabelPeople() {
+      const query = (document.getElementById('qr-person-search').value || '').trim().toLocaleLowerCase('id-ID');
+      const host = document.getElementById('qr-person-results');
+      if (!query) { host.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Ketik nama atau NRP untuk mencari karyawan.</p>'; return; }
+      const groups = new Map();
+      rawAssetsList.forEach(a => {
+        const name = String(a['PIC Barang'] || '').trim();
+        const nrp = String(a['ID Karyawan (NRP)'] || '').trim();
+        if (!name && !nrp) return;
+        const key = (name + '|' + nrp).toLocaleLowerCase('id-ID');
+        if (!(name + ' ' + nrp).toLocaleLowerCase('id-ID').includes(query)) return;
+        if (!groups.has(key)) groups.set(key, {name:name || 'Nama tidak tersedia', nrp:nrp || '-', assets:[]});
+        groups.get(key).assets.push(a);
+      });
+      const people = [...groups.values()].sort((a,b) => a.name.localeCompare(b.name, 'id'));
+      if (!people.length) { host.innerHTML = '<p class="text-xs text-amber-300 bg-amber-950/40 border border-amber-800/40 rounded-xl p-3">Karyawan tidak ditemukan.</p>'; return; }
+      host.innerHTML = people.map((person, i) => `
+        <div class="p-3 border border-slate-800 hover:border-violet-500/50 bg-slate-800/40 rounded-xl flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="block text-sm font-semibold text-slate-200">${escapeHTML(person.name)}</span>
+            <span class="block text-[11px] text-slate-400">NRP: ${escapeHTML(person.nrp)} (${person.assets.length} label)</span>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="printQrLabelsForPerson(${i}, 'sticker')" class="px-2.5 py-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-semibold transition" title="Cetak Label Tempel Kecil">
+              <i class="fa-solid fa-tag mr-1"></i> Tempel
+            </button>
+            <button type="button" onclick="printQrLabelsForPerson(${i}, 'standard')" class="px-2.5 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold transition" title="Cetak Label Standar">
+              <i class="fa-solid fa-qrcode mr-1"></i> Standar
+            </button>
+          </div>
+        </div>
+      `).join('');
+      host.dataset.people = JSON.stringify(people.map(p => ({name:p.name,nrp:p.nrp,codes:p.assets.map(a => String(a['Kode Aset']))})));
+    }
+
+    function printQrLabelsForPerson(index, type = 'sticker') {
+      const host = document.getElementById('qr-person-results');
+      let people = [];
+      try { people = JSON.parse(host.dataset.people || '[]'); } catch (_) {}
+      const person = people[index];
+      if (!person) { alert('Data karyawan tidak ditemukan.'); return; }
+      const wanted = new Set(person.codes.map(String));
+      const data = rawAssetsList.filter(a => wanted.has(String(a['Kode Aset'])));
+      if (!data.length) { alert('Tidak ada aset untuk karyawan ini.'); return; }
+      closeQrLabelOptions();
+      if (type === 'sticker') {
+        openStickerLabelPrintWindow(data);
+      } else {
+        openQrPrintWindow(data);
+      }
+    }
+
+    /* --- FUNGSI KHUSUS CETAK LABEL TEMPEL KECIL (PRESISI & PAS) --- */
+function openStickerLabelPrintWindow(data) {
+  const win = window.open('', '_blank');
+  if (!win) { alert('Popup diblokir browser. Izinkan popup untuk mencetak label.'); return; }
+
+  const stickers = data.map(a => {
+    const assetId = makeAsetId(a);
+    return `
+      <div class="sticker-card">
+        <div class="sticker-qr">
+          <img src="${qrImageUrl(a)}" alt="QR Code ${escapeHTML(a['Kode Aset'])}">
+        </div>
+        <div class="sticker-info">
+          <div class="title">PT. CBML · QR Code</div>
+          <div class="asset-id">ASET ID: ${escapeHTML(assetId)}</div>
+          <div class="sub-info">HCGA : Site Adaro Indonesia</div>
+          <div class="sub-info">hrga.adr@cbml.co.id</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  win.document.open();
+  win.document.write(`<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Cetak Label Tempel Aset CBML</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: Arial, Helvetica, sans-serif; 
+      padding: 6mm; 
+      background: #fff; 
+      color: #000; 
+    }
+    
+    /* Layout Grid 3 Kolom Kompak pada Kertas A4 */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3.5mm 4mm;
+      justify-content: start;
+    }
+
+    /* Kartu Label Tempel Ukuran Presisi (Pas Tanpa Ruang Kosong Berlebih) */
+    .sticker-card {
+      border: 2px solid #000;
+      border-radius: 9px;
+      padding: 2.5mm 3mm;
+      display: inline-flex;
+      align-items: center;
+      gap: 2.5mm;
+      background: #fff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      width: 100%;
+      max-width: 65mm; /* Membatasi lebar agar pas dengan proporsi label */
+      height: 24mm;    /* Tinggi fisik label presisi */
+      overflow: hidden;
+    }
+
+    /* Ukuran QR Code Pas */
+    .sticker-qr {
+      flex-shrink: 0;
+      width: 19mm;
+      height: 19mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sticker-qr img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Informasi Teks Sisi Kanan Rapat & Rapi */
+    .sticker-info {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.2;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .sticker-info .title {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #000;
+      letter-spacing: -0.1px;
+    }
+
+    .sticker-info .asset-id {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #000;
+      margin: 1px 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sticker-info .sub-info {
+      font-size: 7.5px;
+      font-style: italic;
+      color: #000;
+      font-weight: 600;
+    }
+
+    @media print {
+      @page { size: A4 portrait; margin: 5mm; }
+      body { padding: 0; }
+      .grid-container { gap: 3mm 3.5mm; }
+      .sticker-card { border-width: 1.8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-container">
+    ${stickers}
+  </div>
+  <script>
+    window.onload = () => {
+      const imgs = [...document.images];
+      Promise.all(imgs.map(i => i.complete ? Promise.resolve() : new Promise(r => { i.onload = r; i.onerror = r; }))).then(() => {
+        setTimeout(() => window.print(), 300);
+      });
+    };
+  <\/script>
 </body>
+</html>`);
+  win.document.close();
+  if (typeof auditClientEvent === 'function') {
+    auditClientEvent('PRINT_STICKER_LABEL', 'Jumlah label tempel: ' + data.length);
+  }
+}
+
+
+    function printSingleQrLabel(kode) {
+
+      const item = rawAssetsList.find(a => String(a['Kode Aset']) === String(kode));
+
+      if (!item) { alert('Data aset tidak ditemukan.'); return; }
+
+      openQrPrintWindow([item]);
+
+    }
+
+
+
+    function openQrPrintWindow(data) {
+
+      const win = window.open('', '_blank');
+
+      if (!win) { alert('Popup diblokir browser. Izinkan popup untuk mencetak label QR.'); return; }
+
+      const labels = data.map(a => `<article class="label"><div class="brand">PT. CBML · LABEL ASET</div><img src="${qrImageUrl(a)}" alt="QR Code ${escapeHTML(a['Kode Aset'])}"><div class="code">KODE ASET: ${escapeHTML(a['Kode Aset'])}</div><div class="name">${escapeHTML(a['Nama Aset'] || '-')}</div><div class="asset-id">ASET ID: ${escapeHTML(makeAsetId(a))}</div><div class="meta">PIC: ${escapeHTML(a['PIC Barang'] || '-')}</div><div class="meta">Lokasi: ${escapeHTML(a['Lokasi'] || '-')}</div></article>`).join('');
+
+      win.document.open();
+
+      win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Label QR Aset CBML</title><style>body{font-family:Arial,sans-serif;margin:10mm;color:#111}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8mm}.label{border:1px solid #888;border-radius:5px;padding:4mm;text-align:center;break-inside:avoid;min-height:54mm}.brand{font-size:9px;font-weight:bold;letter-spacing:.5px}.label img{width:30mm;height:30mm;display:block;margin:2mm auto}.code{font-size:11px;font-weight:bold}.name{font-size:10px;font-weight:bold;margin-top:2mm}.asset-id{font-size:8px;font-weight:bold;margin-top:1.5mm;overflow-wrap:anywhere;word-break:break-word}.meta{font-size:8px;margin-top:1mm;overflow-wrap:anywhere}@media print{@page{size:A4;margin:8mm}.grid{gap:5mm}.label{padding:3mm}}</style></head><body><h2>Label QR Code Aset CBML</h2><p>Jumlah label: ${data.length}. QR membuka aplikasi dan meminta login sebelum detail aset ditampilkan.</p><div class="grid">${labels}</div><script>window.onload=()=>{const imgs=[...document.images];Promise.all(imgs.map(i=>i.complete?Promise.resolve():new Promise(r=>{i.onload=r;i.onerror=r}))).then(()=>setTimeout(()=>window.print(),300));};<\/script></body></html>`);
+
+      win.document.close();
+
+      auditClientEvent('PRINT_QR_LABEL', 'Jumlah label: ' + data.length);
+
+    }
+
+
+
+    function csvCell(value) {
+
+      let s = String(value == null ? '' : value);
+
+      if (/^[=+@]/.test(s)) s = "'" + s;
+
+      return '"' + s.replace(/"/g, '""') + '"';
+
+    }
+
+
+
+    function downloadCsv(filename, headers, rows) {
+
+      const csv = '\ufeff' + [headers, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+
+      a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+
+    }
+
+
+
+    function exportAssetsExcel() {
+  const rawData = getVisibleAssets();
+  if (!rawData.length) { alert('Tidak ada data aset untuk diekspor.'); return; }
+
+  // Urutkan data berdasarkan Kategori secara alfabetis (A-Z)
+  const data = [...rawData].sort((a, b) => {
+    const katA = String(a['Kategori'] || '').toUpperCase();
+    const katB = String(b['Kategori'] || '').toUpperCase();
+    return katA.localeCompare(katB, 'id');
+  });
+
+  const headers = Object.keys(data[0]).filter(h => h !== 'rowNum');
+  const safeExcelText = value => {
+    let text = String(value == null ? '' : value);
+    if (/^[\s]*[=+@]/.test(text)) text = "'" + text;
+    return escapeHTML(text);
+  };
+  const tableHeaders = headers.map(h => `<th>${safeExcelText(h)}</th>`).join('');
+  const tableRows = data.map((asset, rowIndex) => `<tr class="${rowIndex % 2 ? 'alt' : ''}">${headers.map(h => {
+    const value = asset[h] == null ? '' : asset[h];
+    const display = h.toLowerCase().includes('tanggal') ? formatDateIndo(value) : value;
+    return `<td>${safeExcelText(display)}</td>`;
+  }).join('')}</tr>`).join('');
+  const generatedAt = new Date().toLocaleString('id-ID');
+  const html = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><style>
+    body{font-family:Calibri,Arial,sans-serif;color:#1f2937}h1{font-size:18pt;color:#17365d;margin-bottom:4px}
+    .meta{color:#555;font-size:10pt}
+    table{border-collapse:collapse;border:1px solid #aab7c4;width:100%}th{background:#1f2937;color:#fff;font-weight:bold;text-align:center;vertical-align:middle;border:1px solid #fff;padding:8px}
+    td{border:1px solid #cbd5e1;padding:6px;vertical-align:top;mso-number-format:"\@"}tr.alt td{background:#f1f5f9}
+  </style></head><body><h1>LAPORAN DATA ASET PT. CBML</h1>
+  <p class="meta">Tanggal ekspor: ${safeExcelText(generatedAt)} &nbsp; | &nbsp; Jumlah aset: ${data.length}</p>
+  <table><thead><tr>${tableHeaders}</tr></thead><tbody>${tableRows}</tbody></table></body></html>`;
+  const blob = new Blob(['\ufeff', html], {type:'application/vnd.ms-excel;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Laporan_Aset_CBML_' + new Date().toISOString().slice(0,10) + '.xls';
+  document.body.appendChild(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  if (typeof auditClientEvent === 'function') {
+    auditClientEvent('EXPORT_ASSET_CSV', 'Jumlah data: ' + data.length);
+  }
+}
+
+
+    function printAssetsReport() {
+
+      const data = getVisibleAssets();
+
+      if (!data.length) { alert('Tidak ada data aset untuk dicetak.'); return; }
+
+      const columns = ['Kode Aset','Nama Aset','Kategori','Merk','Serial Number','PIC Barang','Divisi','Kondisi','Lokasi','Tanggal Diterima HO','Tanggal Penyerahan'];
+
+      const head = columns.map(c=>`<th>${escapeHTML(c)}</th>`).join('');
+
+      const body = data.map(a=>'<tr>'+columns.map(c=>`<td>${escapeHTML(c.includes('Tanggal')?formatDateIndo(a[c]):(a[c]||''))}</td>`).join('')+'</tr>').join('');
+
+      const win=window.open('','_blank'); if(!win){alert('Popup diblokir. Izinkan popup untuk membuat laporan PDF.');return;}
+
+      win.document.open(); win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Aset CBML</title><style>body{font:10px Arial,sans-serif;color:#111;margin:12mm}h1{font-size:18px;margin:0 0 4px}p{font-size:10px;color:#555}table{border-collapse:collapse;width:100%;margin-top:12px}th,td{border:1px solid #bbb;padding:5px;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#e8edf4}tr{break-inside:avoid}@page{size:A4 landscape;margin:8mm}@media print{body{margin:0}}</style></head><body><h1>Laporan Data Aset PT. CBML</h1><p>Tanggal cetak: ${escapeHTML(new Date().toLocaleString('id-ID'))} · Jumlah aset: ${data.length}</p><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table><script>window.onload=()=>setTimeout(()=>window.print(),250);<\/script></body></html>`); win.document.close();
+
+      auditClientEvent('PRINT_ASSET_REPORT', 'Jumlah data: ' + data.length);
+
+    }
+
+
+
+    function clearActivityLog() {
+
+      if (!currentUser || currentUser.role !== 'Admin') { 
+
+        alert('Akses hanya untuk Admin.'); 
+
+        return; 
+
+      }
+
+
+
+      const setuju = confirm("Apakah Anda yakin ingin menghapus seluruh histori/log login?");
+
+      if (!setuju) return;
+
+
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+        google.script.run
+
+          .withSuccessHandler(res => {
+
+            if (res && res.success) {
+
+              alert(res.message);
+
+              loadActivityLog();
+
+            } else {
+
+              alert("Gagal menghapus log: " + (res ? res.message : "Terjadi kesalahan."));
+
+            }
+
+          })
+
+          .withFailureHandler(err => {
+
+            alert("Gagal terhubung ke server: " + (err && err.message ? err.message : err));
+
+          })
+
+          .clearAuditLog(sessionToken);
+
+      }
+
+    }
+
+
+
+    function loadActivityLog() {
+
+      const body=document.getElementById('activity-table-body'); if(!body)return;
+
+      body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-slate-500">Memuat catatan login...</td></tr>';
+
+      google.script.run.withSuccessHandler(res=>{
+
+        if(!res||!res.success){body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-red-400">Log tidak dapat dimuat.</td></tr>';return;}
+
+        const rows=res.data||[];
+
+        if(!rows.length){body.innerHTML='<tr><td colspan="5" class="p-6 text-center text-slate-500">Belum ada catatan login tercatat.</td></tr>';return;}
+
+        body.innerHTML=rows.map(r=>`<tr class="border-b border-slate-800 hover:bg-slate-800/40"><td class="p-3 whitespace-nowrap text-slate-400">${escapeHTML(r['Waktu']||'')}</td><td class="p-3 font-semibold text-white">${escapeHTML(r['Username']||'')}</td><td class="p-3 text-slate-400">${escapeHTML(r['Role']||'')}</td><td class="p-3 font-semibold text-cyan-400">${escapeHTML(r['Aktivitas']||'')}</td><td class="p-3 text-slate-400">${escapeHTML(r['Detail']||'')}</td></tr>`).join('');
+
+      }).withFailureHandler(err=>{body.innerHTML=`<tr><td colspan="5" class="p-6 text-center text-red-400">Gagal memuat log: ${escapeHTML(err&&err.message?err.message:err)}</td></tr>`;}).getAuditLog(sessionToken,300);
+
+    }
+
+
+
+    function auditClientEvent(action, detail) {
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) google.script.run.logUserActivity(sessionToken, action, detail);
+
+    }
+
+
+
+    /* --- SCAN QR & PEMERIKSAAN FISIK LOGIC --- */
+
+    function getRequestedAssetCode() {
+
+      try { return String(new URLSearchParams(window.location.search).get('asset') || '').trim(); }
+
+      catch (e) { return ''; }
+
+    }
+
+
+
+    function parseScannedAssetCode(text) {
+
+      const raw = String(text || '').trim();
+
+      try {
+
+        const u = new URL(raw);
+
+        const q = u.searchParams.get('asset');
+
+        if (q) return q.trim();
+
+      } catch (e) {}
+
+      const oldFormat = raw.match(/^CBML-ASSET\|[^|]*\|([^|]+)(?:\|.*)?$/i);
+
+      if (oldFormat) return oldFormat[1].trim();
+
+      return raw.replace(/^KODE\s*ASET\s*:?\s*/i, '').trim();
+
+    }
+
+
+
+    function startAssetScanner() {
+
+      const status = document.getElementById('scan-status');
+
+      if (!currentUser || !sessionToken) { status.textContent = 'Silakan login terlebih dahulu.'; return; }
+
+      
+
+      try {
+
+        const EMBEDDED_URL = QR_SCANNER_URL + '?embedded=true';
+
+        qrScannerWindow = window.open(EMBEDDED_URL, '_blank');
+
+        
+
+        if (!qrScannerWindow) {
+
+          status.textContent = 'Tab pemindai diblokir browser. Izinkan popup.';
+
+          return;
+
+        }
+
+        status.textContent = 'Pemindai kamera aktif. Arahkan kode QR ke kamera.';
+
+      } catch (err) {
+
+        status.textContent = 'URL pemindai tidak valid: ' + (err && err.message ? err.message : err);
+
+      }
+
+    }
+
+
+
+    function stopAssetScanner() {
+
+      if (qrScannerWindow && !qrScannerWindow.closed) qrScannerWindow.close();
+
+      qrScannerWindow = null;
+
+      const status = document.getElementById('scan-status');
+
+      if (status) status.textContent = 'Pemindai ditutup. Anda dapat memasukkan kode aset secara manual.';
+
+    }
+
+
+
+    window.addEventListener('message', function(event) {
+
+      if (!qrScannerWindow || event.source !== qrScannerWindow) return;
+
+      if (!qrScannerOrigin || event.origin !== qrScannerOrigin) return;
+
+      const data = event.data;
+
+      if (!data || data.type !== 'HCGA_QR_SCAN' || typeof data.text !== 'string') return;
+
+      const code = parseScannedAssetCode(data.text);
+
+      if (!/^\d+$/.test(code)) {
+
+        document.getElementById('scan-status').textContent = 'QR terbaca, tetapi isinya bukan kode aset yang valid.';
+
+        return;
+
+      }
+
+      document.getElementById('inspection-code').value = code;
+
+      document.getElementById('scan-status').textContent = 'QR berhasil dibaca. Memverifikasi aset…';
+
+      stopAssetScanner();
+
+      lookupInspectionAsset();
+
+    });
+
+
+
+    function loadInspectionEmployees() {
+
+      if (!sessionToken || !(typeof google !== 'undefined' && google.script && google.script.run)) return;
+
+      google.script.run.withSuccessHandler(res => {
+
+        const list = document.getElementById('inspection-employee-list');
+
+        if (!list || !res || !res.success) return;
+
+        list.innerHTML = (res.data || []).filter(e => e && e.Nama).map(e => `<option value="${escapeHTML(e.Nama)}" label="${escapeHTML([e.NRP,e.Jabatan,e.Divisi].filter(Boolean).join(' · '))}"></option>`).join('');
+
+      }).withFailureHandler(err => console.warn('Master karyawan tidak dapat dimuat:', err)).getEmployees(sessionToken);
+
+    }
+
+
+
+    function handleInspectionResultChange() {
+
+      const notFound = document.getElementById('inspection-result').value === 'Tidak Ditemukan';
+
+      const pic = document.getElementById('inspection-pic');
+
+      const loc = document.getElementById('inspection-location');
+
+      const cond = document.getElementById('inspection-condition');
+
+      pic.required = !notFound; loc.required = !notFound;
+
+      if (notFound) { pic.value = ''; loc.value = ''; cond.value = 'Tidak Ditemukan'; }
+
+      else if (currentInspectionAsset) {
+
+        if (!pic.value) pic.value = currentInspectionAsset['PIC Barang'] || '';
+
+        if (!loc.value) loc.value = currentInspectionAsset['Lokasi'] || '';
+
+        if (cond.value === 'Tidak Ditemukan') cond.value = currentInspectionAsset['Kondisi'] || '';
+
+      }
+
+    }
+
+
+
+    function lookupInspectionAsset() {
+
+      const code = String(document.getElementById('inspection-code').value || '').trim();
+
+      const status = document.getElementById('scan-status');
+
+      if (!code) { status.textContent = 'Masukkan atau scan kode aset terlebih dahulu.'; return; }
+
+      if (!sessionToken) { status.textContent = 'Sesi login tidak ditemukan. Silakan login kembali.'; return; }
+
+      status.textContent = 'Memverifikasi akses dan memuat detail aset…';
+
+      google.script.run.withSuccessHandler(res => {
+
+        if (!res || !res.success || !res.asset) { status.textContent = 'Detail aset tidak tersedia.'; return; }
+
+        currentInspectionAsset = res.asset;
+
+        renderInspectionAsset(res.asset);
+
+        renderInspectionHistory(res.recentChecks || []);
+
+        status.textContent = 'Aset terverifikasi dari Google Sheets.';
+
+      }).withFailureHandler(err => {
+
+        currentInspectionAsset = null;
+
+        document.getElementById('inspection-detail-card').classList.add('hidden');
+
+        document.getElementById('inspection-history').textContent = 'Riwayat belum tersedia.';
+
+        status.textContent = 'Gagal memuat aset: ' + (err && err.message ? err.message : err);
+
+      }).getAssetDetailForInspection(sessionToken, code);
+
+    }
+
+
+
+    function renderInspectionAsset(a) {
+
+      document.getElementById('inspection-detail-card').classList.remove('hidden');
+
+      document.getElementById('inspection-asset-title').textContent = (a['Nama Aset'] || 'Nama aset tidak tersedia') + ' · Kode ' + (a['Kode Aset'] || '-');
+
+      document.getElementById('inspection-asset-subtitle').textContent = [a['Merk'], a['Model'], a['Serial Number'] ? 'SN: '+a['Serial Number'] : ''].filter(Boolean).join(' · ');
+
+      document.getElementById('inspection-asset-condition').textContent = a['Kondisi'] || 'Belum ditentukan';
+
+      const fields = [['PIC terdaftar',a['PIC Barang']],['NRP',a['ID Karyawan (NRP)']],['Jabatan',a['Jabatan']],['Divisi',a['Divisi']],['Lokasi terdaftar',a['Lokasi']],['Kategori / tipe',[a['Kategori'],a['Tipe Asset']].filter(Boolean).join(' / ')]];
+
+      document.getElementById('inspection-asset-fields').innerHTML = fields.map(([label,value]) => `<div class="p-3 bg-slate-800/60 border border-slate-700/60 rounded-xl"><p class="text-[10px] uppercase tracking-wide font-bold text-slate-400">${escapeHTML(label)}</p><p class="text-sm font-semibold text-white mt-1 break-words">${escapeHTML(value || '-')}</p></div>`).join('');
+
+      document.getElementById('inspection-date').value = new Date().toISOString().slice(0,10);
+
+      document.getElementById('inspection-pic').value = a['PIC Barang'] || '';
+
+      document.getElementById('inspection-location').value = a['Lokasi'] || '';
+
+      const cond = document.getElementById('inspection-condition');
+
+      const options = [...cond.options].map(o=>o.value);
+
+      cond.value = options.includes(String(a['Kondisi'] || '')) ? String(a['Kondisi']) : '';
+
+      document.getElementById('inspection-result').value = '';
+
+      document.getElementById('inspection-pic').required = true;
+
+      document.getElementById('inspection-location').required = true;
+
+      document.getElementById('inspection-notes').value = '';
+
+      document.getElementById('inspection-form-status').classList.add('hidden');
+
+    }
+
+
+
+    function renderInspectionHistory(rows) {
+
+      const host = document.getElementById('inspection-history');
+
+      if (!rows.length) { host.innerHTML = '<p class="text-xs text-slate-500 py-3">Belum ada pemeriksaan fisik yang tercatat untuk aset ini.</p>'; return; }
+
+      host.innerHTML = '<div class="space-y-3">' + rows.map(r => `<article class="p-3 border border-slate-800 rounded-xl bg-slate-800/40"><div class="flex flex-wrap justify-between gap-2"><strong class="text-sm text-white">${escapeHTML(r['Hasil Pemeriksaan'] || '-')}</strong><span class="text-xs text-slate-400">${escapeHTML(r['Tanggal Pemeriksaan'] || r['Waktu Pencatatan'] || '')}</span></div><p class="text-xs text-slate-300 mt-1">PIC: ${escapeHTML(r['PIC Aktual'] || '-')} · Lokasi: ${escapeHTML(r['Lokasi Aktual'] || '-')} · Kondisi: ${escapeHTML(r['Kondisi Aktual'] || '-')}</p><p class="text-xs text-slate-400 mt-1">Petugas: ${escapeHTML(r['Petugas'] || '-')} ${r['Catatan'] ? '· Catatan: '+escapeHTML(r['Catatan']) : ''}</p></article>`).join('') + '</div>';
+
+    }
+
+
+
+    function submitInspectionForm(e) {
+
+      e.preventDefault();
+
+      if (!currentInspectionAsset) { alert('Cari atau scan aset terlebih dahulu.'); return; }
+
+      const btn = document.getElementById('btn-submit-inspection');
+
+      const status = document.getElementById('inspection-form-status');
+
+      const payload = {kodeAset:String(currentInspectionAsset['Kode Aset']),tanggal:document.getElementById('inspection-date').value,picAktual:document.getElementById('inspection-pic').value.trim(),lokasiAktual:document.getElementById('inspection-location').value.trim(),kondisiAktual:document.getElementById('inspection-condition').value,hasilPemeriksaan:document.getElementById('inspection-result').value,catatan:document.getElementById('inspection-notes').value.trim()};
+
+      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan…';
+
+      status.className = 'rounded-xl p-3 text-xs bg-blue-950/60 text-blue-300 border border-blue-800/60'; status.textContent = 'Menyimpan hasil pemeriksaan ke Google Sheets…'; status.classList.remove('hidden');
+
+      google.script.run.withSuccessHandler(res => {
+
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
+
+        status.className = 'rounded-xl p-3 text-xs bg-emerald-950/60 text-emerald-300 border border-emerald-800/60'; status.textContent = (res && res.message ? res.message : 'Pemeriksaan tersimpan.') + ' ID: ' + (res && res.id ? res.id : '-');
+
+        lookupInspectionAsset();
+
+      }).withFailureHandler(err => {
+
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
+
+        status.className = 'rounded-xl p-3 text-xs bg-red-950/60 text-red-300 border border-red-800/60'; status.textContent = 'Gagal menyimpan: ' + (err && err.message ? err.message : err);
+
+      }).submitPhysicalInspection(sessionToken, payload);
+
+    }
+
+
+
+    function resetInspectionForm() {
+
+      currentInspectionAsset = null;
+
+      document.getElementById('inspection-code').value = '';
+
+      document.getElementById('inspection-detail-card').classList.add('hidden');
+
+      document.getElementById('inspection-history').textContent = 'Belum ada aset dipilih.';
+
+      document.getElementById('scan-status').textContent = 'Masukkan atau scan kode aset untuk memulai pemeriksaan.';
+
+    }
+
+
+
+    /* --- SETUP DATABASE ACTION --- */
+
+    function triggerSetupDatabase() {
+
+      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+
+      if (confirm('Jalankan Setup Database? Ini akan memastikan sheet Users, Assets, Employees, AuditLog, dan HistoriPIC tersedia di Google Spreadsheet.')) {
+
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+
+          google.script.run
+
+            .withSuccessHandler(res => {
+
+              if (res.success) {
+
+                alert('Database berhasil di-setup!\nURL Spreadsheet: ' + res.url);
+
+                refreshDashboardData();
+
+                loadAssetTable();
+
+              } else {
+
+                alert('Gagal setup database: ' + res.message);
+
+              }
+
+            })
+
+            .setupDatabase(sessionToken);
+
+        } else {
+
+          alert('Demo mode: Simulasi setup database berhasil.');
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+</body>
+
 </html>
