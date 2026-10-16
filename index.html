@@ -3060,175 +3060,66 @@
 
 
 
-    function handleSaveAsset(e) {
-
-      e.preventDefault();
-
-
-
-      const isEdit = document.getElementById('modal-asset').dataset.editMode === 'true';
-
-
-
-      const payload = {
-
-        '_isEdit': isEdit,
-
-        'Kode Aset': document.getElementById('form-kode').value,
-
-        'Nama Aset': document.getElementById('form-nama').value,
-
-        'Kategori': document.getElementById('form-kategori').value.toUpperCase(),
-
-        'Tipe Aset': document.getElementById('form-tipe').value.toUpperCase(),
-
-        'Merk': document.getElementById('form-merk').value.toUpperCase(),
-
-        'Model': document.getElementById('form-model').value,
-
-        'Serial Number': document.getElementById('form-sn').value,
-
-        'Kondisi': document.getElementById('form-kondisi').value,
-
-        'ID Karyawan (NRP)': document.getElementById('form-nrp').value,
-
-        'PIC Barang': document.getElementById('form-pic').value,
-
-        'Jabatan': document.getElementById('form-jabatan').value,
-
-        'Unit Bisnis': 'PT. Chandra Batuah Mustika Lestari',
-
-        'Divisi': document.getElementById('form-divisi').value.toUpperCase(),
-
-        'Lokasi': document.getElementById('form-lokasi').value,
-
-        'Tanggal Diterima HO': document.getElementById('form-tgl-ho').value,
-
-        'Tanggal Penyerahan': document.getElementById('form-tgl-serah').value,
-
-        'Yang Memberikan 1': document.getElementById('form-pemberi-1').value,
-
-        'Yang Memberikan 2': document.getElementById('form-pemberi-2').value,
-
-        'Yang Menerima 2': document.getElementById('form-penerima-2').value
-
-      };
-
-
-
-      const btn = document.getElementById('btn-save-asset');
-
-      btn.disabled = true;
-
-      btn.innerText = 'Menyimpan...';
-
-
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            btn.disabled = false;
-
-            btn.innerText = 'Simpan Data';
-
-
-
-            if (res.success) {
-
-              closeAssetModal();
-
-              loadAssetTable();
-
-              refreshDashboardData();
-
-
-
-              if (!isEdit && res.code) {
-
-                alert('Aset berhasil disimpan. Kode Aset otomatis: ' + res.code);
-
-              }
-
-            } else {
-
-              alert('Gagal menyimpan: ' + res.message);
-
-            }
-
-          })
-
-          .withFailureHandler(err => {
-
-            btn.disabled = false;
-
-            btn.innerText = 'Simpan Data';
-
-            alert('Gagal terhubung server: ' + err.message);
-
-          })
-
-          .saveAsset(sessionToken, payload);
-
-      } else {
-
-        setTimeout(() => {
-
-          btn.disabled = false;
-
-          btn.innerText = 'Simpan Data';
-
-
-
-          if (isEdit) {
-
-            const idx = rawAssetsList.findIndex(a => String(a['Kode Aset']) === String(payload['Kode Aset']));
-
-            if (idx === -1) {
-
-              alert('Kode Aset tidak ditemukan.');
-
-              return;
-
-            }
-
-            rawAssetsList[idx] = { ...rawAssetsList[idx], ...payload };
-
-          } else {
-
-            const newCode = getLocalNextAssetCode();
-
-            payload['Kode Aset'] = newCode;
-
-            rawAssetsList.push(payload);
-
-          }
-
-
-
-          closeAssetModal();
-
-          renderAssetTable(rawAssetsList);
-
-          populateKategoriFilter(rawAssetsList);
-
-
-
-          if (!isEdit) {
-
-            alert('Aset berhasil disimpan. Kode Aset otomatis: ' + payload['Kode Aset']);
-
-          }
-
-        }, 500);
-
-      }
-
+    async function handleSaveAsset(e) {
+  e.preventDefault();
+
+  const isEdit = document.getElementById('modal-asset').dataset.editMode === 'true';
+
+  const payload = {
+    '_isEdit': isEdit,
+    'Kode Aset': document.getElementById('form-kode').value,
+    'Nama Aset': document.getElementById('form-nama').value,
+    'Kategori': document.getElementById('form-kategori').value.toUpperCase(),
+    'Tipe Aset': document.getElementById('form-tipe').value.toUpperCase(),
+    'Merk': document.getElementById('form-merk').value.toUpperCase(),
+    'Model': document.getElementById('form-model').value,
+    'Serial Number': document.getElementById('form-sn').value,
+    'Kondisi': document.getElementById('form-kondisi').value,
+    'ID Karyawan (NRP)': document.getElementById('form-nrp').value,
+    'PIC Barang': document.getElementById('form-pic').value,
+    'Jabatan': document.getElementById('form-jabatan').value,
+    'Unit Bisnis': 'PT. Chandra Batuah Mustika Lestari',
+    'Divisi': document.getElementById('form-divisi').value.toUpperCase(),
+    'Lokasi': document.getElementById('form-lokasi').value,
+    'Tanggal Diterima HO': document.getElementById('form-tgl-ho').value,
+    'Tanggal Penyerahan': document.getElementById('form-tgl-serah').value,
+    'Yang Memberikan 1': document.getElementById('form-pemberi-1').value,
+    'Yang Memberikan 2': document.getElementById('form-pemberi-2').value,
+    'Yang Menerima 2': document.getElementById('form-penerima-2').value
+  };
+
+  const btn = document.getElementById('btn-save-asset');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "SAVE_ASSET",
+        token: sessionToken,
+        assetData: payload
+      })
+    });
+
+    const res = await response.json();
+    btn.disabled = false;
+    btn.innerText = 'Simpan Data';
+
+    if (res.success) {
+      closeAssetModal();
+      loadAssetTable();
+      refreshDashboardData();
+      alert(res.message);
+    } else {
+      alert('Gagal menyimpan ke Google Sheets: ' + res.message);
     }
-
-
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerText = 'Simpan Data';
+    alert('Gagal terhubung ke server Google Sheets: ' + (err.message || err));
+  }
+}
 
     function confirmDeleteAsset(kode) {
 
