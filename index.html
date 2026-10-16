@@ -3770,57 +3770,35 @@ function openStickerLabelPrintWindow(data) {
 
 
 
-    function clearActivityLog() {
+    async function clearActivityLog() {
+  if (!currentUser || currentUser.role !== 'Admin') { 
+    alert('Akses hanya untuk Admin.'); 
+    return; 
+  }
 
-      if (!currentUser || currentUser.role !== 'Admin') { 
+  const setuju = confirm("Apakah Anda yakin ingin menghapus seluruh histori/log login?");
+  if (!setuju) return;
 
-        alert('Akses hanya untuk Admin.'); 
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "CLEAR_AUDIT_LOG",
+        token: sessionToken
+      })
+    });
 
-        return; 
-
-      }
-
-
-
-      const setuju = confirm("Apakah Anda yakin ingin menghapus seluruh histori/log login?");
-
-      if (!setuju) return;
-
-
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res && res.success) {
-
-              alert(res.message);
-
-              loadActivityLog();
-
-            } else {
-
-              alert("Gagal menghapus log: " + (res ? res.message : "Terjadi kesalahan."));
-
-            }
-
-          })
-
-          .withFailureHandler(err => {
-
-            alert("Gagal terhubung ke server: " + (err && err.message ? err.message : err));
-
-          })
-
-          .clearAuditLog(sessionToken);
-
-      }
-
+    const res = await response.json();
+    if (res && res.success) {
+      alert(res.message);
+      loadActivityLog();
+    } else {
+      alert("Gagal menghapus log: " + (res ? res.message : "Terjadi kesalahan."));
     }
-
-
+  } catch (err) {
+    alert("Gagal terhubung ke server: " + (err.message || err));
+  }
+}
 
    async function loadActivityLog() {
   const body = document.getElementById('activity-table-body');
