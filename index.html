@@ -4100,41 +4100,58 @@ function openStickerLabelPrintWindow(data) {
 
 
 
-    function submitInspectionForm(e) {
+    async function submitInspectionForm(e) {
+  e.preventDefault();
+  if (!currentInspectionAsset) { alert('Cari atau scan aset terlebih dahulu.'); return; }
+  
+  const btn = document.getElementById('btn-submit-inspection');
+  const status = document.getElementById('inspection-form-status');
+  
+  const payload = {
+    kodeAset: String(currentInspectionAsset['Kode Aset']),
+    tanggal: document.getElementById('inspection-date').value,
+    picAktual: document.getElementById('inspection-pic').value.trim(),
+    lokasiAktual: document.getElementById('inspection-location').value.trim(),
+    kondisiAktual: document.getElementById('inspection-condition').value,
+    hasilPemeriksaan: document.getElementById('inspection-result').value,
+    catatan: document.getElementById('inspection-notes').value.trim()
+  };
 
-      e.preventDefault();
+  btn.disabled = true; 
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan…';
+  status.className = 'rounded-xl p-3 text-xs bg-blue-950/60 text-blue-300 border border-blue-800/60'; 
+  status.textContent = 'Menyimpan hasil pemeriksaan ke Google Sheets…'; 
+  status.classList.remove('hidden');
 
-      if (!currentInspectionAsset) { alert('Cari atau scan aset terlebih dahulu.'); return; }
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "SUBMIT_INSPECTION",
+        token: sessionToken,
+        payload: payload
+      })
+    });
 
-      const btn = document.getElementById('btn-submit-inspection');
+    const res = await response.json();
+    btn.disabled = false; 
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
 
-      const status = document.getElementById('inspection-form-status');
-
-      const payload = {kodeAset:String(currentInspectionAsset['Kode Aset']),tanggal:document.getElementById('inspection-date').value,picAktual:document.getElementById('inspection-pic').value.trim(),lokasiAktual:document.getElementById('inspection-location').value.trim(),kondisiAktual:document.getElementById('inspection-condition').value,hasilPemeriksaan:document.getElementById('inspection-result').value,catatan:document.getElementById('inspection-notes').value.trim()};
-
-      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan…';
-
-      status.className = 'rounded-xl p-3 text-xs bg-blue-950/60 text-blue-300 border border-blue-800/60'; status.textContent = 'Menyimpan hasil pemeriksaan ke Google Sheets…'; status.classList.remove('hidden');
-
-      google.script.run.withSuccessHandler(res => {
-
-        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
-
-        status.className = 'rounded-xl p-3 text-xs bg-emerald-950/60 text-emerald-300 border border-emerald-800/60'; status.textContent = (res && res.message ? res.message : 'Pemeriksaan tersimpan.') + ' ID: ' + (res && res.id ? res.id : '-');
-
-        lookupInspectionAsset();
-
-      }).withFailureHandler(err => {
-
-        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
-
-        status.className = 'rounded-xl p-3 text-xs bg-red-950/60 text-red-300 border border-red-800/60'; status.textContent = 'Gagal menyimpan: ' + (err && err.message ? err.message : err);
-
-      }).submitPhysicalInspection(sessionToken, payload);
-
+    if (res && res.success) {
+      status.className = 'rounded-xl p-3 text-xs bg-emerald-950/60 text-emerald-300 border border-emerald-800/60'; 
+      status.textContent = (res.message || 'Pemeriksaan tersimpan.') + ' ID: ' + (res.id || '-');
+      lookupInspectionAsset();
+    } else {
+      status.className = 'rounded-xl p-3 text-xs bg-red-950/60 text-red-300 border border-red-800/60'; 
+      status.textContent = 'Gagal menyimpan: ' + (res ? res.message : 'Terjadi kesalahan.');
     }
-
-
+  } catch (err) {
+    btn.disabled = false; 
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Pemeriksaan';
+    status.className = 'rounded-xl p-3 text-xs bg-red-950/60 text-red-300 border border-red-800/60'; 
+    status.textContent = 'Gagal terhubung server: ' + (err.message || err);
+  }
+}
 
     function resetInspectionForm() {
 
