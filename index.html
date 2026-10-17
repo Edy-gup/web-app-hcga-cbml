@@ -2882,147 +2882,46 @@
 
 
 
-    function handleUpdateAssetCode(e) {
-
-      e.preventDefault();
-
-
-
-      const oldCode = document.getElementById('edit-old-kode').value.trim();
-
-      const newCode = document.getElementById('edit-new-kode').value.trim();
-
-
-
-      if (!/^\d+$/.test(newCode)) {
-
-        alert('Kode Aset baru harus berupa angka.');
-
-        return;
-
-      }
-
-
-
-      if (oldCode === newCode) {
-
-        alert('Kode Aset baru sama dengan kode lama.');
-
-        return;
-
-      }
-
-
-
-      const btn = document.getElementById('btn-update-kode');
-
-      btn.disabled = true;
-
-      btn.innerText = 'Menyimpan...';
-
-
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            btn.disabled = false;
-
-            btn.innerText = 'Simpan Kode';
-
-
-
-            if (res.success) {
-
-              closeEditKodeModal();
-
-              loadAssetTable();
-
-              refreshDashboardData();
-
-              alert(res.message);
-
-            } else {
-
-              alert('Gagal mengubah kode: ' + res.message);
-
-            }
-
-          })
-
-          .withFailureHandler(err => {
-
-            btn.disabled = false;
-
-            btn.innerText = 'Simpan Kode';
-
-            alert('Gagal terhubung server: ' + err.message);
-
-          })
-
-          .updateAssetCode(sessionToken, oldCode, newCode);
-
-      } else {
-
-        const duplicate = rawAssetsList.some(item =>
-
-          String(item['Kode Aset']) === newCode && String(item['Kode Aset']) !== oldCode
-
-        );
-
-
-
-        if (duplicate) {
-
-          btn.disabled = false;
-
-          btn.innerText = 'Simpan Kode';
-
-          alert('Kode Aset ' + newCode + ' sudah digunakan.');
-
-          return;
-
-        }
-
-
-
-        const item = rawAssetsList.find(item => String(item['Kode Aset']) === oldCode);
-
-        if (!item) {
-
-          btn.disabled = false;
-
-          btn.innerText = 'Simpan Kode';
-
-          alert('Kode Aset lama tidak ditemukan.');
-
-          return;
-
-        }
-
-
-
-        item['Kode Aset'] = newCode;
-
-        closeEditKodeModal();
-
-        renderAssetTable(rawAssetsList);
-
-        populateKategoriFilter(rawAssetsList);
-
-        btn.disabled = false;
-
-        btn.innerText = 'Simpan Kode';
-
-        alert('Kode Aset berhasil diubah dari ' + oldCode + ' menjadi ' + newCode + '.');
-
-      }
-
+    async function handleUpdateAssetCode(e) {
+  e.preventDefault();
+  const oldCode = document.getElementById('edit-old-kode').value.trim();
+  const newCode = document.getElementById('edit-new-kode').value.trim();
+
+  if (!/^\d+$/.test(newCode)) { alert('Kode Aset baru harus berupa angka.'); return; }
+  if (oldCode === newCode) { alert('Kode Aset baru sama dengan kode lama.'); return; }
+
+  const btn = document.getElementById('btn-update-kode');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "UPDATE_ASSET_CODE",
+        token: sessionToken,
+        oldCode: oldCode,
+        newCode: newCode
+      })
+    });
+    const res = await response.json();
+    btn.disabled = false;
+    btn.innerText = 'Simpan Kode';
+
+    if (res.success) {
+      closeEditKodeModal();
+      loadAssetTable();
+      refreshDashboardData();
+      alert(res.message);
+    } else {
+      alert('Gagal mengubah kode: ' + res.message);
     }
-
-
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerText = 'Simpan Kode';
+    alert('Gagal terhubung server: ' + (err.message || err));
+  }
+}
 
     async function handleSaveAsset(e) {
   e.preventDefault();
@@ -3085,48 +2984,31 @@
   }
 }
 
-    function confirmDeleteAsset(kode) {
+    async function confirmDeleteAsset(kode) {
+  if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+  if (!confirm(`Apakah Anda yakin ingin menghapus data aset Kode: ${kode}?`)) return;
 
-      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
-
-      if (!confirm(`Apakah Anda yakin ingin menghapus data aset Kode: ${kode}?`)) return;
-
-
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-        google.script.run
-
-          .withSuccessHandler(res => {
-
-            if (res.success) {
-
-              loadAssetTable();
-
-              refreshDashboardData();
-
-            } else {
-
-              alert('Gagal hapus: ' + res.message);
-
-            }
-
-          })
-
-          .deleteAsset(sessionToken, kode);
-
-      } else {
-
-        rawAssetsList = rawAssetsList.filter(a => a['Kode Aset'] !== kode);
-
-        renderAssetTable(rawAssetsList);
-
-      }
-
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "DELETE_ASSET",
+        token: sessionToken,
+        code: kode
+      })
+    });
+    const res = await response.json();
+    if (res && res.success) {
+      loadAssetTable();
+      refreshDashboardData();
+      alert(res.message || 'Aset berhasil dihapus.');
+    } else {
+      alert('Gagal hapus: ' + (res ? res.message : 'Terjadi kesalahan.'));
     }
-
-
-
+  } catch (err) {
+    alert('Gagal terhubung server: ' + (err.message || err));
+  }
+}
     /* --- HISTORI DAN PERPINDAHAN PIC --- */
 
     function openTransferPicModal(kode) {
@@ -3153,30 +3035,90 @@
 
     function closeTransferPicModal(){document.getElementById('modal-transfer-pic').classList.add('hidden');}
 
-    function submitTransferPic(e){
+    async function submitTransferPic(e) {
+  e.preventDefault();
+  if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
 
-      e.preventDefault(); if(!currentUser||currentUser.role!=='Admin'){alert('Akses hanya untuk Admin.');return;}
+  const btn = document.getElementById('btn-transfer-pic');
+  btn.disabled = true;
+  btn.innerText = 'Menyimpan...';
 
-      const btn=document.getElementById('btn-transfer-pic');btn.disabled=true;btn.innerText='Menyimpan...';
+  const payload = {
+    kodeAset: document.getElementById('transfer-kode').value,
+    tanggal: document.getElementById('transfer-tanggal').value,
+    picBaru: document.getElementById('transfer-pic').value.trim(),
+    nrpBaru: document.getElementById('transfer-nrp').value.trim(),
+    jabatanBaru: document.getElementById('transfer-jabatan').value.trim(),
+    divisiBaru: document.getElementById('transfer-divisi').value.trim(),
+    lokasiBaru: document.getElementById('transfer-lokasi').value.trim(),
+    alasan: document.getElementById('transfer-alasan').value,
+    catatan: document.getElementById('transfer-catatan').value.trim()
+  };
 
-      const payload={kodeAset:document.getElementById('transfer-kode').value,tanggal:document.getElementById('transfer-tanggal').value,picBaru:document.getElementById('transfer-pic').value.trim(),nrpBaru:document.getElementById('transfer-nrp').value.trim(),jabatanBaru:document.getElementById('transfer-jabatan').value.trim(),divisiBaru:document.getElementById('transfer-divisi').value.trim(),lokasiBaru:document.getElementById('transfer-lokasi').value.trim(),alasan:document.getElementById('transfer-alasan').value,catatan:document.getElementById('transfer-catatan').value.trim()};
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "TRANSFER_PIC",
+        token: sessionToken,
+        payload: payload
+      })
+    });
+    const res = await response.json();
+    btn.disabled = false;
+    btn.innerText = 'Simpan Perpindahan';
 
-      google.script.run.withSuccessHandler(res=>{btn.disabled=false;btn.innerText='Simpan Perpindahan';if(res&&res.success){closeTransferPicModal();loadAssetTable();refreshDashboardData();alert(res.message);}else alert((res&&res.message)||'Gagal menyimpan perpindahan PIC.');}).withFailureHandler(err=>{btn.disabled=false;btn.innerText='Simpan Perpindahan';alert('Gagal menyimpan perpindahan PIC: '+(err&&err.message?err.message:err));}).transferAssetPIC(sessionToken,payload);
+    if (res && res.success) {
+      closeTransferPicModal();
+      loadAssetTable();
+      refreshDashboardData();
+      alert(res.message);
+    } else {
+      alert((res && res.message) || 'Gagal menyimpan perpindahan PIC.');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerText = 'Simpan Perpindahan';
+    alert('Gagal terhubung ke server: ' + (err.message || err));
+  }
+}
 
+async function openPicHistory(kode) {
+  const a = rawAssetsList.find(x => String(x['Kode Aset']) === String(kode));
+  if (!a) return;
+
+  document.getElementById('history-asset-title').innerText = `Kode ${a['Kode Aset']} — ${a['Nama Aset']} | PIC saat ini: ${a['PIC Barang'] || '-'}`;
+  document.getElementById('pic-history-content').innerHTML = '<p class="p-4 text-center">Memuat histori...</p>';
+  document.getElementById('modal-pic-history').classList.remove('hidden');
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "GET_PIC_HISTORY",
+        token: sessionToken,
+        code: kode
+      })
+    });
+    const res = await response.json();
+    const host = document.getElementById('pic-history-content');
+
+    if (!res || !res.success) {
+      host.innerHTML = '<p class="p-4 text-red-400">Histori tidak dapat dimuat.</p>';
+      return;
     }
 
-    function openPicHistory(kode){
-
-      const a=rawAssetsList.find(x=>String(x['Kode Aset'])===String(kode));if(!a)return;
-
-      document.getElementById('history-asset-title').innerText=`Kode ${a['Kode Aset']} — ${a['Nama Aset']} | PIC saat ini: ${a['PIC Barang']||'-'}`;
-
-      document.getElementById('pic-history-content').innerHTML='<p class="p-4 text-center">Memuat histori...</p>';document.getElementById('modal-pic-history').classList.remove('hidden');
-
-      google.script.run.withSuccessHandler(res=>{const host=document.getElementById('pic-history-content');if(!res||!res.success){host.innerHTML='<p class="p-4 text-red-400">Histori tidak dapat dimuat.</p>';return;}const rows=res.data||[];if(!rows.length){host.innerHTML='<div class="p-6 text-center rounded-xl bg-slate-800/60"><i class="fa-solid fa-clock-rotate-left text-2xl text-slate-500 mb-2"></i><p class="font-semibold text-slate-300">Belum ada histori perpindahan PIC</p><p class="mt-1 text-slate-400">Histori akan tercatat otomatis setiap kali Admin menggunakan fitur Pindah PIC.</p></div>';return;}host.innerHTML='<div class="overflow-x-auto"><table class="min-w-full border-collapse"><thead><tr class="bg-slate-800 text-left"><th class="p-3">Tanggal</th><th class="p-3">PIC Sebelumnya</th><th class="p-3">PIC Baru</th><th class="p-3">Alasan</th><th class="p-3">Catatan</th><th class="p-3">Diproses Oleh</th></tr></thead><tbody>'+rows.map(r=>`<tr class="border-b border-slate-800 align-top"><td class="p-3 whitespace-nowrap">${escapeHTML(formatDateIndo(r['Tanggal Perpindahan']))}</td><td class="p-3">${escapeHTML(r['PIC Sebelumnya']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Sebelumnya']||'')}</div></td><td class="p-3 font-semibold text-white">${escapeHTML(r['PIC Baru']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Baru']||'')}</div></td><td class="p-3">${escapeHTML(r['Alasan Perpindahan']||'-')}</td><td class="p-3 whitespace-pre-wrap">${escapeHTML(r['Catatan']||'-')}</td><td class="p-3">${escapeHTML(r['Diproses Oleh']||'-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['Waktu Pencatatan']||'')}</div></td></tr>`).join('')+'</tbody></table></div>';}).withFailureHandler(err=>{document.getElementById('pic-history-content').innerHTML='<p class="p-4 text-red-400">Gagal memuat histori: '+escapeHTML(err&&err.message?err.message:err)+'</p>';}).getPicHistory(sessionToken,kode);
-
+    const rows = res.data || [];
+    if (!rows.length) {
+      host.innerHTML = '<div class="p-6 text-center rounded-xl bg-slate-800/60"><i class="fa-solid fa-clock-rotate-left text-2xl text-slate-500 mb-2"></i><p class="font-semibold text-slate-300">Belum ada histori perpindahan PIC</p><p class="mt-1 text-slate-400">Histori akan tercatat otomatis setiap kali Admin menggunakan fitur Pindah PIC.</p></div>';
+      return;
     }
 
+    host.innerHTML = '<div class="overflow-x-auto"><table class="min-w-full border-collapse"><thead><tr class="bg-slate-800 text-left"><th class="p-3">Tanggal</th><th class="p-3">PIC Sebelumnya</th><th class="p-3">PIC Baru</th><th class="p-3">Alasan</th><th class="p-3">Catatan</th><th class="p-3">Diproses Oleh</th></tr></thead><tbody>' + rows.map(r => `<tr class="border-b border-slate-800 align-top"><td class="p-3 whitespace-nowrap">${escapeHTML(formatDateIndo(r['Tanggal Perpindahan']))}</td><td class="p-3">${escapeHTML(r['PIC Sebelumnya'] || '-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Sebelumnya'] || '')}</div></td><td class="p-3 font-semibold text-white">${escapeHTML(r['PIC Baru'] || '-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['NRP Baru'] || '')}</div></td><td class="p-3">${escapeHTML(r['Alasan Perpindahan'] || '-')}</td><td class="p-3 whitespace-pre-wrap">${escapeHTML(r['Catatan'] || '-')}</td><td class="p-3">${escapeHTML(r['Diproses Oleh'] || '-')}<div class="text-[10px] text-slate-500">${escapeHTML(r['Waktu Pencatatan'] || '')}</div></td></tr>`).join('') + '</tbody></table></div>';
+  } catch (err) {
+    document.getElementById('pic-history-content').innerHTML = '<p class="p-4 text-red-400">Gagal memuat histori: ' + escapeHTML(err.message || err) + '</p>';
+  }
+}
     function closePicHistory(){document.getElementById('modal-pic-history').classList.add('hidden');}
 
 
