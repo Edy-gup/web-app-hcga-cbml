@@ -4086,45 +4086,35 @@ function openStickerLabelPrintWindow(data) {
 
     /* --- SETUP DATABASE ACTION --- */
 
-    function triggerSetupDatabase() {
+    async function triggerSetupDatabase() {
+  if (!currentUser || currentUser.role !== 'Admin') { 
+    alert('Akses hanya untuk Admin.'); 
+    return; 
+  }
 
-      if (!currentUser || currentUser.role !== 'Admin') { alert('Akses hanya untuk Admin.'); return; }
+  if (confirm('Jalankan Setup Database? Ini akan memastikan sheet Users, Assets, Employees, AuditLog, dan HistoriPIC tersedia di Google Spreadsheet.')) {
+    try {
+      const response = await fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "SETUP_DATABASE",
+          token: sessionToken
+        })
+      });
 
-      if (confirm('Jalankan Setup Database? Ini akan memastikan sheet Users, Assets, Employees, AuditLog, dan HistoriPIC tersedia di Google Spreadsheet.')) {
-
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-
-          google.script.run
-
-            .withSuccessHandler(res => {
-
-              if (res.success) {
-
-                alert('Database berhasil di-setup!\nURL Spreadsheet: ' + res.url);
-
-                refreshDashboardData();
-
-                loadAssetTable();
-
-              } else {
-
-                alert('Gagal setup database: ' + res.message);
-
-              }
-
-            })
-
-            .setupDatabase(sessionToken);
-
-        } else {
-
-          alert('Demo mode: Simulasi setup database berhasil.');
-
-        }
-
+      const res = await response.json();
+      if (res && res.success) {
+        alert('Database berhasil di-setup!\nURL Spreadsheet: ' + (res.url || '-'));
+        refreshDashboardData();
+        loadAssetTable();
+      } else {
+        alert('Gagal setup database: ' + (res ? res.message : 'Terjadi kesalahan.'));
       }
-
+    } catch (err) {
+      alert('Gagal terhubung ke server Google Sheets: ' + (err.message || err));
     }
+  }
+}
 
   </script>
 
